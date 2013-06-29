@@ -1,0 +1,16 @@
+*.pyc
+*.swp
+*.pyd
+*.so
+*.o
+*.a
+*.lo
+*.la
+*~
+*.bak
+*.swp
+.\#*
+.tox
+_configtest.c
+/build
+/dist
