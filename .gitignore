@@ -14,3 +14,4 @@
 _configtest.c
 /build
 /dist
+/data
