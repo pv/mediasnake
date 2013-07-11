@@ -1,4 +1,5 @@
 import os
+import django.conf.global_settings as DEFAULT_SETTINGS
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'data')
 PROJECT_DIR = os.path.join(os.path.dirname(__file__), '..')
@@ -15,6 +16,8 @@ STATIC_ROOT = os.path.join(DATA_DIR, 'static')
 
 MEDIA_URL = '/media/'
 STATIC_URL = '/static/'
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
 
 STATICFILES_DIRS = (
     os.path.join(PROJECT_DIR, 'static'),
@@ -38,8 +41,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    # Uncomment the next line for simple clickjacking protection:
-    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
 ROOT_URLCONF = 'mediasnake.urls'
@@ -48,6 +50,11 @@ WSGI_APPLICATION = 'mediasnake.wsgi.application'
 
 TEMPLATE_DIRS = (
     os.path.join(PROJECT_DIR, 'templates')
+)
+
+TEMPLATE_CONTEXT_PROCESSORS = DEFAULT_SETTINGS.TEMPLATE_CONTEXT_PROCESSORS + (
+    'mediasnake.context_processors.global_template_variables',
+    'django.core.context_processors.request',
 )
 
 INSTALLED_APPS = (

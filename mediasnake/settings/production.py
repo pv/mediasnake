@@ -3,6 +3,9 @@ from .common import *
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
@@ -20,10 +23,8 @@ DATABASES = {
     }
 }
 
-SECRET_KEY = 'f_estp&amp;wj#_#d0b@(z=d6&amp;6_ayeb6%_065d*q1lj&amp;bldzv-2n^'
+SECRET_KEY = ''
 
-# Hosts/domain names that are valid for this site; required if DEBUG is False
-# See https://docs.djangoproject.com/en/1.4/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = []
 
 try:
