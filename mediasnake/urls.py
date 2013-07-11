@@ -11,6 +11,8 @@ urlpatterns = patterns('',
     url(r'^account/$', 'django.contrib.auth.views.password_change'),
     url(r'^account/password-changed/$', 'django.contrib.auth.views.password_change_done'),
 
+    url(r'^', include('mediasnakefiles.urls')),
+
     # Examples:
     # url(r'^$', 'mediasnake.views.home', name='home'),
     # url(r'^mediasnake/', include('mediasnake.foo.urls')),
@@ -21,3 +23,13 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     # url(r'^admin/', include(admin.site.urls)),
 )
+
+
+if settings.DEBUG:
+    prefix = settings.MEDIASNAKEFILES_STREAM_URL.strip('/')
+    urlpatterns += patterns('',
+        (r'^%s/(?P<path>.*)$' % prefix,
+         'django.views.static.serve',
+         {'document_root': settings.MEDIASNAKEFILES_STREAM_ROOT}
+         ),
+    )

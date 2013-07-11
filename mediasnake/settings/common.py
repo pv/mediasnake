@@ -11,7 +11,7 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-MEDIA_ROOT = os.path.join(DATA_DIR, 'uploads')
+MEDIA_ROOT = os.path.join(DATA_DIR, 'media')
 STATIC_ROOT = os.path.join(DATA_DIR, 'static')
 
 MEDIA_URL = '/media/'
@@ -65,6 +65,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+    'mediasnakefiles',
     'south',
 )
 
@@ -96,3 +97,16 @@ LOGGING = {
         },
     }
 }
+
+
+MEDIASNAKEFILES_DIRS = [
+    os.path.join(DATA_DIR, 'videos'),
+]
+MEDIASNAKEFILES_MIMETYPES = (
+    "video/*",
+    ""
+)
+MEDIASNAKEFILES_STREAM_ROOT = os.path.join(DATA_DIR, 'streaming')
+MEDIASNAKEFILES_STREAM_URL = '/stream_file/'
+MEDIASNAKEFILES_FFMPEG = "ffmpeg"
+MEDIASNAKEFILES_TICKET_LIFETIME_HOURS = 3
