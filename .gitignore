@@ -15,3 +15,4 @@ _configtest.c
 /build
 /dist
 /data
+/mediasnake/settings/local_settings.py
