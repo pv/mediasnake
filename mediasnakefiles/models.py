@@ -39,7 +39,19 @@ class VideoFile(models.Model):
             dn = settings.MEDIASNAKEFILES_DIRS[0]
             root = os.path.normpath(dn)
 
-        return os.path.relpath(self.filename, root)
+        return os.path.relpath(os.path.dirname(self.filename),
+                               root)
+
+    @property
+    def title(self):
+        title = os.path.splitext(self.basename)[0]
+        title = re.sub(r'[\._-]dvdrip[\._-]', ' ', title, re.I)
+        title = re.sub(r'\[.*?\]', '', title)
+        title = re.sub(r'\(.*?\)', '', title)
+        title = re.sub(r'{.*?}', '', title)
+        title = re.sub(r'[_-]', ' ', title)
+        title = re.sub(r'\s+', ' ', title)
+        return title
 
     @property
     def thumbnail_filename(self):

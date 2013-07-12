@@ -1,4 +1,5 @@
 import os
+import re
 
 from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseForbidden
@@ -10,10 +11,34 @@ from mediasnake_sendfile import sendfile
 from mediasnakefiles.models import VideoFile, StreamingTicket
 
 
+def _sort_key(video_file):
+    dirname = video_file.relative_dirname
+    basename = video_file.basename
+    title = video_file.title
+    numbers = tuple(int(x) for x in re.sub(r'[^0-9 \t]', '', title).split())
+    return (dirname.split(os.path.sep), numbers, title, basename)
+
+
+class _VideoGroup(object):
+    def __init__(self, name, video_files):
+        self.video_files = video_files
+        self.name = name
+
+
 @login_required
 def list(request):
     video_files = VideoFile.objects.all()
-    context = {'video_files': video_files}
+    video_groups = []
+
+    if video_files:
+        group = None
+        for video_file in sorted(video_files, key=_sort_key):
+            if group is None or video_file.relative_dirname != group.name:
+                group = _VideoGroup(video_file.relative_dirname, [])
+                video_groups.append(group)
+            group.video_files.append(video_file)
+
+    context = {'video_groups': video_groups}
     return render(request, "mediasnakefiles/list.html", context)
 
 
