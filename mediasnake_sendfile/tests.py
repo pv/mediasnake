@@ -3,6 +3,8 @@
 from django.conf import settings
 from django.test import TestCase
 from django.http import HttpResponse, Http404, HttpRequest
+import django.http
+
 import os.path
 from tempfile import mkdtemp
 import shutil
@@ -102,51 +104,54 @@ class TestSimpleBackend(TempFileTestCase):
         self.assertEqual(len(result), len(self.filecontent[start:stop]))
         self.assertEqual(result, self.filecontent[start:stop])
 
-    def test_range_request_header(self):
-        request = HttpRequest()
-        response = real_sendfile(request, self.filepath)
-        self.assertEqual(response['Accept-ranges'], 'bytes')
-        self.assertEqual(response['Content-length'], '90')
-        self._verify_response_content(response, 0, 90)
+    if hasattr(django.http, 'StreamingHttpResponse'):
+        # Django >= 1.5
 
-        # Request with both bounds
-        request = HttpRequest()
-        request.META['HTTP_RANGE'] = 'bytes=5-7'
-        response = real_sendfile(request, self.filepath)
-        self.assertEqual(response.status_code, 206)
-        self.assertEqual(response['Content-length'], '3')
-        self.assertEqual(response['Content-range'], 'bytes 5-7/90')
-        self._verify_response_content(response, 5, 7+1)
+        def test_range_request_header(self):
+            request = HttpRequest()
+            response = real_sendfile(request, self.filepath)
+            self.assertEqual(response['Accept-ranges'], 'bytes')
+            self.assertEqual(response['Content-length'], '90')
+            self._verify_response_content(response, 0, 90)
 
-        # Request with start bound
-        request = HttpRequest()
-        request.META['HTTP_RANGE'] = 'bytes=1-'
-        response = real_sendfile(request, self.filepath)
-        self.assertEqual(response.status_code, 206)
-        self.assertEqual(response['Content-length'], '89')
-        self.assertEqual(response['Content-range'], 'bytes 1-89/90')
-        self._verify_response_content(response, 1, 90)
+            # Request with both bounds
+            request = HttpRequest()
+            request.META['HTTP_RANGE'] = 'bytes=5-7'
+            response = real_sendfile(request, self.filepath)
+            self.assertEqual(response.status_code, 206)
+            self.assertEqual(response['Content-length'], '3')
+            self.assertEqual(response['Content-range'], 'bytes 5-7/90')
+            self._verify_response_content(response, 5, 7+1)
 
-        # Request with end bound
-        request = HttpRequest()
-        request.META['HTTP_RANGE'] = 'bytes=-1'
-        response = real_sendfile(request, self.filepath)
-        self.assertEqual(response.status_code, 206)
-        self.assertEqual(response['Content-length'], '2')
-        self.assertEqual(response['Content-range'], 'bytes 0-1/90')
-        self._verify_response_content(response, 0, 1+1)
+            # Request with start bound
+            request = HttpRequest()
+            request.META['HTTP_RANGE'] = 'bytes=1-'
+            response = real_sendfile(request, self.filepath)
+            self.assertEqual(response.status_code, 206)
+            self.assertEqual(response['Content-length'], '89')
+            self.assertEqual(response['Content-range'], 'bytes 1-89/90')
+            self._verify_response_content(response, 1, 90)
 
-        # Out of bounds request
-        request = HttpRequest()
-        request.META['HTTP_RANGE'] = 'bytes=0-90'
-        response = real_sendfile(request, self.filepath)
-        self.assertEqual(response.status_code, 416)
+            # Request with end bound
+            request = HttpRequest()
+            request.META['HTTP_RANGE'] = 'bytes=-1'
+            response = real_sendfile(request, self.filepath)
+            self.assertEqual(response.status_code, 206)
+            self.assertEqual(response['Content-length'], '2')
+            self.assertEqual(response['Content-range'], 'bytes 0-1/90')
+            self._verify_response_content(response, 0, 1+1)
 
-        # Malformed header
-        request = HttpRequest()
-        request.META['HTTP_RANGE'] = 'bytes=foo'
-        response = real_sendfile(request, self.filepath)
-        self.assertEqual(response.status_code, 400)
+            # Out of bounds request
+            request = HttpRequest()
+            request.META['HTTP_RANGE'] = 'bytes=0-90'
+            response = real_sendfile(request, self.filepath)
+            self.assertEqual(response.status_code, 416)
+
+            # Malformed header
+            request = HttpRequest()
+            request.META['HTTP_RANGE'] = 'bytes=foo'
+            response = real_sendfile(request, self.filepath)
+            self.assertEqual(response.status_code, 400)
 
 
 class TestXSendfileBackend(TempFileTestCase):
