@@ -12,6 +12,7 @@ from django.db import models, transaction
 from django.conf import settings
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
+import django.utils.timezone
 
 
 THUMBNAIL_PATH = os.path.abspath(os.path.join(settings.DATA_DIR, 'video_thumbs'))
@@ -90,29 +91,32 @@ class StreamingTicket(models.Model):
     secret = models.CharField(max_length=128, null=False, unique=True)
     video_file = models.ForeignKey(VideoFile, null=False)
     timestamp = models.DateTimeField()
+    remote_address = models.IPAddressField()
 
     @classmethod
-    def new_for_video(cls, video_file):
+    def new_for_video(cls, video_file, remote_address):
         secret = get_secret_128(video_file.filename)
         return StreamingTicket(secret=secret, video_file=video_file,
-                               timestamp=datetime.datetime.now())
+                               remote_address=remote_address,
+                               timestamp=django.utils.timezone.now())
 
-    @property
-    def is_valid(self):
-        return (self.timestamp >= StreamingTicket._threshold())
+    def is_valid(self, remote_address):
+        return (self.timestamp >= StreamingTicket._threshold() and
+                self.remote_address == remote_address)
 
     def create_symlink(self):
-        path = settings.MEDIASNAKEFILES_STREAM_ROOT
+        path = settings.SENDFILE_ROOT
         dst = os.path.join(path, self.secret)
         if not os.path.islink(dst):
             if not os.path.isdir(path):
                 os.makedirs(path)
             os.symlink(self.video_file.filename, dst)
+        return dst
 
     @staticmethod
-    def _threshold(self):
+    def _threshold():
         delta = datetime.timedelta(seconds=int(3600*settings.MEDIASNAKEFILES_TICKET_LIFETIME_HOURS))
-        return datetime.datetime.now() - delta
+        return django.utils.timezone.now() - delta
 
     @classmethod
     def cleanup(cls):

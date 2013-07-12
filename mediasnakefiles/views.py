@@ -1,9 +1,11 @@
 import os
 
 from django.conf import settings
-from django.http import HttpResponse, Http404, StreamingHttpResponse
+from django.http import HttpResponse, Http404, HttpResponseForbidden
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+
+from mediasnake_sendfile import sendfile
 
 from mediasnakefiles.models import VideoFile, StreamingTicket
 
@@ -38,44 +40,25 @@ def stream(request, id):
     except VideoFile.DoesNotExist:
         raise Http404
 
-    ticket = StreamingTicket.new_for_video(video_file)
+    ticket = StreamingTicket.new_for_video(video_file,
+                                           request.META['REMOTE_ADDR'])
     ticket.save()
 
-    return redirect(stream_ticket, secret=ticket.secret)
+    # Do some housekeeping at the same time
+    StreamingTicket.cleanup()
+
+    return redirect(ticket_stream, secret=ticket.secret)
 
 
-def stream_ticket(request, secret):
+def ticket_stream(request, secret):
     try:
         ticket = StreamingTicket.objects.get(secret=secret)
     except StreamingTicket.DoesNotExist:
         raise Http404
 
-    ticket.create_symlink()
+    if not ticket.is_valid(request.META['REMOTE_ADDR']):
+        return HttpResponseForbidden()
 
-    url = settings.MEDIASNAKEFILES_STREAM_URL + ticket.secret
-    response = redirect(url)
-    response['X-Accel-Redirect'] = url
-    return response
-
-
-def _file_reader_generator(fn, start=None, stop=None):
-    BLOCK_SIZE = 131072
-    with open(fn, 'rb') as f:
-
-        if start is not None:
-            f.seek(start)
-
-        pos = f.tell()
-        while True:
-            if stop is not None:
-                block_size = min(BLOCK_SIZE, stop - pos)
-                if block_size <= 0:
-                    return
-            else:
-                block_size = BLOCK_SIZE
-
-            block = f.read(block_size)
-            pos += len(block)
-            if not block:
-                break
-            yield block
+    video_file = ticket.video_file
+    filename = ticket.create_symlink()
+    return sendfile(request, filename, mimetype=video_file.mimetype)

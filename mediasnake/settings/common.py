@@ -65,6 +65,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+    'mediasnake_sendfile',
     'mediasnakefiles',
     'south',
 )
@@ -106,7 +107,9 @@ MEDIASNAKEFILES_MIMETYPES = (
     "video/*",
     ""
 )
-MEDIASNAKEFILES_STREAM_ROOT = os.path.join(DATA_DIR, 'streaming')
-MEDIASNAKEFILES_STREAM_URL = '/stream_file/'
-MEDIASNAKEFILES_FFMPEG = "ffmpeg"
 MEDIASNAKEFILES_TICKET_LIFETIME_HOURS = 3
+MEDIASNAKEFILES_FFMPEGTHUMBNAILER = "ffmpegthumbnailer"
+
+SENDFILE_BACKEND = 'mediasnake_sendfile.backends.simple'
+SENDFILE_ROOT = os.path.join(DATA_DIR, 'streaming')
+SENDFILE_URL = '/stream_file/'
