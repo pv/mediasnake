@@ -32,7 +32,6 @@ def sendfile(request, filename, **kwargs):
 
     response = StreamingHttpResponse(fileiter)
     response["Last-Modified"] = http_date(statobj[stat.ST_MTIME])
-    response['Accept-Ranges'] = 'bytes'
 
     # Parse range request, if any
     start = None
