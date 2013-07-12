@@ -61,4 +61,5 @@ def ticket_stream(request, secret):
 
     video_file = ticket.video_file
     filename = ticket.create_symlink()
-    return sendfile(request, filename, mimetype=video_file.mimetype)
+    return sendfile(request, filename, mimetype=video_file.mimetype,
+                    accept_ranges=True)
