@@ -34,27 +34,46 @@ def sendfile(request, filename, **kwargs):
     response["Last-Modified"] = http_date(statobj[stat.ST_MTIME])
     response['Accept-Ranges'] = 'bytes'
 
-    # Check for range requests
-    range_request = request.META.get('HTTP_RANGE', '').strip()
-    if range_request:
-        m = re.match(r'^bytes=(?P<start>\d+)?-(?P<stop>\d+)?$', range_request)
-        if m is None:
-            # Unparseable, reply "bad request"
-            return HttpResponse(status=400)
+    # Parse range request, if any
+    start = None
+    stop = None
 
+    range_request = request.META.get('HTTP_RANGE', '').strip()
+    m = re.match(r'^bytes=(?P<start>\d+)?-(?P<stop>\d+)?$', range_request)
+    if m:
         start, stop = m.groups()
         try:
-            fileiter.set_range(None if start is None else int(start),
-                               None if stop is None else int(stop))
+            if start is not None:
+                start = int(start)
+            if stop is not None:
+                stop = int(stop)
+                if start is not None and stop < start:
+                    raise ValueError()
+            if start is None and stop is None:
+                raise ValueError()
 
+            if start is None:
+                start = 0
+            if stop is None:
+                stop = fileiter.file_size - 1
+        except ValueError:
+            # invalid header --- MUST be ignored
+            start = None
+            stop = None
+
+    # Prepare serving ranges
+    if start is not None:
+        try:
+            fileiter.set_range(start, stop)
             response.status_code = 206
-            response['Content-Range'] = 'bytes %d-%d/%d' % (fileiter.start,
-                                                            fileiter.stop,
+            response['Content-Range'] = 'bytes %d-%d/%d' % (start, stop,
                                                             fileiter.file_size)
-            response['Content-length'] = fileiter.stop + 1 - fileiter.start
+            response['Content-Length'] = stop + 1 - start
         except ValueError:
             # Out of bounds
-            return HttpResponse(status=416)
+            response = HttpResponse(status=416)
+            response['Content-Range'] = 'bytes */%d' % (fileiter.file_size,)
+            return response
 
     return response
 
@@ -108,14 +127,7 @@ class _FileStreamer(object):
         self.pos = 0
 
     def set_range(self, start, stop):
-        if start is None:
-            start = 0
-        if stop is None:
-            stop = self.file_size - 1
-
-        if stop < start:
-            raise ValueError("stop < start")
-        if not ((0 <= start < self.file_size) and (-1 <= stop < self.file_size)):
+        if not ((0 <= start < self.file_size) and (0 <= stop < self.file_size)):
             raise ValueError("Start or stop out of bounds")
 
         self.fp.seek(start)

@@ -145,13 +145,17 @@ class TestSimpleBackend(TempFileTestCase):
             request = HttpRequest()
             request.META['HTTP_RANGE'] = 'bytes=0-90'
             response = real_sendfile(request, self.filepath)
+            self.assertEqual(response['Content-range'], 'bytes */90')
             self.assertEqual(response.status_code, 416)
 
-            # Malformed header
-            request = HttpRequest()
-            request.META['HTTP_RANGE'] = 'bytes=foo'
-            response = real_sendfile(request, self.filepath)
-            self.assertEqual(response.status_code, 400)
+            # Malformed headers, MUST be ignored according to spec
+            for hdr in ['bytes=-', 'bytes=foo', 'bytes=3-2']:
+                request = HttpRequest()
+                request.META['HTTP_RANGE'] = hdr
+                response = real_sendfile(request, self.filepath)
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response['Content-length'], '90')
+                self._verify_response_content(response, 0, 90)
 
 
 class TestXSendfileBackend(TempFileTestCase):
