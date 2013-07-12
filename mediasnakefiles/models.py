@@ -65,17 +65,13 @@ class VideoFile(models.Model):
         if not os.path.isdir(THUMBNAIL_PATH):
             os.makedirs(THUMBNAIL_PATH)
 
-        time_offset = random.randint(4, 60)
-
         fd, tmpfn = tempfile.mkstemp(dir=THUMBNAIL_PATH, prefix='tmp-', suffix=".jpg")
         try:
             os.close(fd)
-            p = subprocess.Popen(["ffmpeg", "-itsoffset", "-%d" % time_offset,
-                                  "-i", self.filename,
-                                  '-vcodec', 'mjpeg',
-                                  "-vframes", "1", "-an", "-f", "rawvideo",
-                                  "-y", "-s", "320x240",
-                                  tmpfn],
+            p = subprocess.Popen([settings.MEDIASNAKEFILES_FFMPEGTHUMBNAILER,
+                                  "-cjpeg", "-s320",
+                                  "-i" + self.filename,
+                                  "-o" + tmpfn],
                                  stdin=subprocess.PIPE, stderr=subprocess.STDOUT,
                                  stdout=subprocess.PIPE)
             p.communicate()
