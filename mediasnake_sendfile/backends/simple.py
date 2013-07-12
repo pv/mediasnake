@@ -26,7 +26,7 @@ def sendfile(request, filename, **kwargs):
         # Django < 1.5
         response = HttpResponse(File(open(filename, 'rb')))
         response["Last-Modified"] = http_date(statobj[stat.ST_MTIME])
-        return
+        return response
 
     fileiter = _FileStreamer(filename)
 
