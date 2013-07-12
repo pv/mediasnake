@@ -14,9 +14,8 @@ framework.
 
 """
 import os
-import sys
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mediasnake.settings.development")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mediasnake.settings.production")
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION
