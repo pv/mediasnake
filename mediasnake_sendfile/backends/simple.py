@@ -40,7 +40,7 @@ def sendfile(request, filename, **kwargs):
 
     range_request = request.META.get('HTTP_RANGE', '').strip()
     m = re.match(r'^bytes=(?P<start>\d+)?-(?P<stop>\d+)?$', range_request)
-    if m:
+    if m and kwargs.get('accept_ranges', False):
         start, stop = m.groups()
         try:
             if start is not None:
