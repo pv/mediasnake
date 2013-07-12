@@ -6,7 +6,8 @@ from django.http import HttpResponse, Http404, HttpRequest
 import os.path
 from tempfile import mkdtemp
 import shutil
-from sendfile import sendfile as real_sendfile, _get_sendfile
+import random
+from mediasnake_sendfile import sendfile as real_sendfile, _get_sendfile
 
 
 def sendfile(request, filename, **kwargs):
@@ -26,10 +27,13 @@ class TempFileTestCase(TestCase):
         if os.path.exists(self.TEMP_FILE_ROOT):
             shutil.rmtree(self.TEMP_FILE_ROOT)
 
-    def ensure_file(self, filename):
+    def ensure_file(self, filename, length=0):
         path = os.path.join(self.TEMP_FILE_ROOT, filename)
         if not os.path.exists(path):
-            open(path, 'w').close()
+            f = open(path, 'w')
+            if length > 0:
+                f.write("".join([chr(random.randint(0, 255)) for _ in range(length)]))
+            f.close()
         return path
 
 
@@ -38,7 +42,7 @@ class TestSendfile(TempFileTestCase):
     def setUp(self):
         super(TestSendfile, self).setUp()
         # set ourselves to be the sendfile backend
-        settings.SENDFILE_BACKEND = 'sendfile.tests'
+        settings.SENDFILE_BACKEND = 'mediasnake_sendfile.tests'
         _get_sendfile.clear()
     
     def _get_readme(self):
@@ -77,11 +81,79 @@ class TestSendfile(TempFileTestCase):
         self.assertEqual('attachment; filename="tests.txt"', response['Content-Disposition'])
 
 
+class TestSimpleBackend(TempFileTestCase):
+
+    def setUp(self):
+        super(TestSimpleBackend, self).setUp()
+        settings.SENDFILE_BACKEND = 'mediasnake_sendfile.backends.simple'
+        _get_sendfile.clear()
+
+        self.filepath = self.ensure_file('readme.txt', length=90)
+        f = open(self.filepath, 'rb')
+        self.filecontent = f.read()
+        f.close()
+
+    def _verify_response_content(self, response, start, stop):
+        result = []
+        for block in response.streaming_content:
+            result.append(block)
+        result = "".join(result)
+
+        self.assertEqual(len(result), len(self.filecontent[start:stop]))
+        self.assertEqual(result, self.filecontent[start:stop])
+
+    def test_range_request_header(self):
+        request = HttpRequest()
+        response = real_sendfile(request, self.filepath)
+        self.assertEqual(response['Accept-ranges'], 'bytes')
+        self.assertEqual(response['Content-length'], '90')
+        self._verify_response_content(response, 0, 90)
+
+        # Request with both bounds
+        request = HttpRequest()
+        request.META['HTTP_RANGE'] = 'bytes=5-7'
+        response = real_sendfile(request, self.filepath)
+        self.assertEqual(response.status_code, 206)
+        self.assertEqual(response['Content-length'], '3')
+        self.assertEqual(response['Content-range'], 'bytes 5-7/90')
+        self._verify_response_content(response, 5, 7+1)
+
+        # Request with start bound
+        request = HttpRequest()
+        request.META['HTTP_RANGE'] = 'bytes=1-'
+        response = real_sendfile(request, self.filepath)
+        self.assertEqual(response.status_code, 206)
+        self.assertEqual(response['Content-length'], '89')
+        self.assertEqual(response['Content-range'], 'bytes 1-89/90')
+        self._verify_response_content(response, 1, 90)
+
+        # Request with end bound
+        request = HttpRequest()
+        request.META['HTTP_RANGE'] = 'bytes=-1'
+        response = real_sendfile(request, self.filepath)
+        self.assertEqual(response.status_code, 206)
+        self.assertEqual(response['Content-length'], '2')
+        self.assertEqual(response['Content-range'], 'bytes 0-1/90')
+        self._verify_response_content(response, 0, 1+1)
+
+        # Out of bounds request
+        request = HttpRequest()
+        request.META['HTTP_RANGE'] = 'bytes=0-90'
+        response = real_sendfile(request, self.filepath)
+        self.assertEqual(response.status_code, 416)
+
+        # Malformed header
+        request = HttpRequest()
+        request.META['HTTP_RANGE'] = 'bytes=foo'
+        response = real_sendfile(request, self.filepath)
+        self.assertEqual(response.status_code, 400)
+
+
 class TestXSendfileBackend(TempFileTestCase):
 
     def setUp(self):
         super(TestXSendfileBackend, self).setUp()
-        settings.SENDFILE_BACKEND = 'sendfile.backends.xsendfile'
+        settings.SENDFILE_BACKEND = 'mediasnake_sendfile.backends.xsendfile'
         _get_sendfile.clear()
 
     def test_correct_file_in_xsendfile_header(self):
@@ -101,7 +173,7 @@ class TestNginxBackend(TempFileTestCase):
 
     def setUp(self):
         super(TestNginxBackend, self).setUp()
-        settings.SENDFILE_BACKEND = 'sendfile.backends.nginx'
+        settings.SENDFILE_BACKEND = 'mediasnake_sendfile.backends.nginx'
         settings.SENDFILE_ROOT = self.TEMP_FILE_ROOT
         settings.SENDFILE_URL = '/private'
         _get_sendfile.clear()
