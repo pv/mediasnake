@@ -45,13 +45,16 @@ class VideoFile(models.Model):
     @property
     def title(self):
         title = os.path.splitext(self.basename)[0]
-        title = re.sub(r'[\._-]dvdrip[\._-]', ' ', title, re.I)
         title = re.sub(r'\[.*?\]', '', title)
         title = re.sub(r'\(.*?\)', '', title)
         title = re.sub(r'{.*?}', '', title)
         title = re.sub(r'[_-]', ' ', title)
         title = re.sub(r'\s+', ' ', title)
-        return title
+        title = title.strip()
+        if title:
+            return title[0].upper() + title[1:]
+        else:
+            return self.basename
 
     @property
     def thumbnail_filename(self):
