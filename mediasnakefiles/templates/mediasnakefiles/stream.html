@@ -6,7 +6,7 @@
 <h1>{{ video_file.title }}</h1>
 
 <p>
-  <a href="{% url 'ticket' ticket.secret %}{{ ticket.dummy_name}}" class="btn btn-inverted">Direct link</a> (valid for 3 hours)
+  <a href="{% url 'ticket' ticket.secret %}{{ ticket.dummy_name}}" type="{{ video_file.mimetype }}" class="btn btn-inverted">Direct link</a> (valid for 3 hours)
 </p>
 
 <p>
