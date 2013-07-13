@@ -9,7 +9,6 @@ def run(*a, **kw):
         raise SystemExit(1)
 
 def main():
-    os.environ['DJANGO_SETTINGS_MODULE'] = 'mediasnake.settings.production'
     run(['virtualenv', 'env'])
     print("\n\n" + "-"*79)
     print("Downloading and installing requirements")
