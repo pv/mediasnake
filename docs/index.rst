@@ -11,7 +11,7 @@ list of videos with thumbnails, and the possibility to stream them.
 Installation
 ------------
 
-For install instructions, read :ref:`install`.
+For install instructions, read ``docs/install``.
 
 
 .. toctree::
