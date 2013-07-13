@@ -53,7 +53,6 @@ Go to ``/srv/mediasnake/`` and copy ``config.ini.example`` to
 Change the following options::
 
     url_prefix = /mediasnake
-    secret_key = "type some random characters here: fjkjakjdklda"
     video_dirs = "/home/data/My Videos", "/home/data/More of My Videos"
     hostnames = "localhost", "127.0.0.1", "mysite.com"
 
