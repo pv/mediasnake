@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}{{ video_file.title }}{% endblock %}
+
+{% block content %}
+<h1>{{ video_file.title }}</h1>
+
+<p>
+  <a href="{% url 'ticket' ticket.secret %}" class="btn btn-inverted">Direct link</a> (valid for 3 hours)
+</p>
+
+<p>
+  <video width="320" controls>
+    <source src="{% url 'ticket' ticket.secret %}" type="{{ video_file.mimetype }}">
+  </video>
+</p>
+{% endblock %}

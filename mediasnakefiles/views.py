@@ -71,7 +71,10 @@ def stream(request, id):
     # Do some housekeeping at the same time
     StreamingTicket.cleanup()
 
-    return redirect(ticket_stream, secret=ticket.secret)
+    context = {'video_file': video_file,
+               'ticket': ticket}
+
+    return render(request, "mediasnakefiles/stream.html", context)
 
 
 def ticket_stream(request, secret):
