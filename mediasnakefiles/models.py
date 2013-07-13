@@ -15,9 +15,6 @@ from django.dispatch import receiver
 import django.utils.timezone
 
 
-THUMBNAIL_PATH = os.path.abspath(os.path.join(settings.DATA_DIR, 'video_thumbs'))
-
-
 class VideoFile(models.Model):
     filename = models.CharField(max_length=16384, unique=True)
 
@@ -68,7 +65,7 @@ class VideoFile(models.Model):
 
         # Create a deterministic thumbnail name
         thumbnail = hash_filename_and_content(self.filename)
-        thumbnail_filename = os.path.join(THUMBNAIL_PATH, thumbnail) + ".jpg"
+        thumbnail_filename = get_thumbnail_filename(thumbnail)
 
         if self.thumbnail != thumbnail:
             self.thumbnail = thumbnail
@@ -77,10 +74,10 @@ class VideoFile(models.Model):
         if os.path.isfile(thumbnail_filename):
             return
 
-        if not os.path.isdir(THUMBNAIL_PATH):
-            os.makedirs(THUMBNAIL_PATH)
+        if not os.path.isdir(settings.SENDFILE_ROOT):
+            os.makedirs(settings.SENDFILE_ROOT)
 
-        fd, tmpfn = tempfile.mkstemp(dir=THUMBNAIL_PATH, prefix='tmp-', suffix=".jpg")
+        fd, tmpfn = tempfile.mkstemp(dir=settings.SENDFILE_ROOT, prefix='tmp-', suffix=".jpg")
         try:
             os.close(fd)
             p = subprocess.Popen([settings.MEDIASNAKEFILES_FFMPEGTHUMBNAILER,
@@ -206,7 +203,7 @@ def scan():
 
 def get_thumbnail_filename(thumbnail):
     thumbnail = re.sub('[^a-f0-9]', '', thumbnail)
-    return os.path.join(THUMBNAIL_PATH, thumbnail) + ".jpg"
+    return os.path.join(settings.SENDFILE_ROOT, thumbnail) + ".jpg"
 
 
 def get_mime_type(filename):

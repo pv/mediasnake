@@ -51,11 +51,10 @@ def thumbnail(request, id):
 
     fn = video_file.thumbnail_filename
 
-    if os.path.isfile(fn):
-        with open(fn, 'rb') as f:
-            return HttpResponse(f.read(), content_type="image/jpeg")
+    if not os.path.isfile(fn):
+        raise Http404
 
-    raise Http404
+    return sendfile(request, fn, mimetype="image/jpeg")
 
 
 @login_required
