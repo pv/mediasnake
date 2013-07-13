@@ -20,7 +20,7 @@
             {# The image is loaded by Javascript (see below) when the accordion is expanded. #}
 	    <img width=190 class="media-object not-loaded"
                  src="{{ STATIC_URL }}mediasnake/img/grey.gif"
-                 data-original="{% url 'thumbnail' video_file.id %}">
+                 data-src="{% url 'thumbnail' video_file.id %}">
 	  </a>
 	  <div class="media-body">
 	    <h4>{{ video_file.title }}</h4>
@@ -38,15 +38,12 @@
 {% endblock %}
 
 {% block extra_js %}
+<script type="text/javascript" src="{{ STATIC_URL }}unveil/js/jquery.unveil.min.js?version=1.1.0"></script>
 <script>
-
 {# Delayed image loading #}
-
 $('.accordion-body').on('show', function () {
-    $(this).find('img.not-loaded').attr('src', function() {
-        $(this).removeClass('not-loaded');
-        return $(this).attr('data-original');
-    });
+    $(this).find('img.not-loaded').unveil();
+    $(this).find('img.not-loaded').removeClass('not-loaded');
 })
 </script>
 {% endblock %}
