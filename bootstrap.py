@@ -13,7 +13,7 @@ def main():
     print("\n\n" + "-"*79)
     print("Downloading and installing requirements")
     print("\n\n")
-    run(['./env/bin/pip', 'install', '-r', 'requirements.txt'])
+    run(['./env/bin/pip', 'install', '-r', 'requirements.txt', '--use-mirrors'])
     print("\n\n" + "-"*79)
     print("Answer 'yes' to whether you want to create a superuser")
     print("\n\n")
