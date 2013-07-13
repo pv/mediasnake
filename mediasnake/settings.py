@@ -143,6 +143,7 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(DATA_DIR, 'mediasnake.log'),
+            'formatter': 'verbose',
         },
     },
     'loggers': {
