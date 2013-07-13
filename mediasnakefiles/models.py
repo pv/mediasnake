@@ -121,12 +121,13 @@ class StreamingTicket(models.Model):
     def url(self):
         if settings.MEDIASNAKEFILE_HTTP_ADDRESS:
             url = (settings.MEDIASNAKEFILE_HTTP_ADDRESS.rstrip('/')
-                   + '/' + settings.ini['url_prefix'].strip('/')
-                   + '/streaming/' + self.dummy_name)
-            return url
+                   + settings.URL_PREFIX.rstrip('/')
+                   + '/ticket/' + self.secret + '/'
+                   + self.dummy_name)
         else:
-            return (reverse('ticket', args=[self.secret]).rstrip('/')
-                    + '/' + self.dummy_name)
+            url = (reverse('ticket', args=[self.secret]).rstrip('/')
+                   + '/' + self.dummy_name)
+        return url
 
     def is_valid(self, remote_address):
         return (self.timestamp >= StreamingTicket._threshold() and

@@ -21,6 +21,7 @@ if ini['file_serving'] == 'nginx':
 else:
     SENDFILE_BACKEND = 'mediasnake_sendfile.backends.simple'
 
+URL_PREFIX = ini['url_prefix']
 MEDIA_URL = ini['url_prefix'].rstrip('/') + '/media/'
 STATIC_URL = ini['url_prefix'].rstrip('/') + '/static/'
 LOGIN_URL = ini['url_prefix'].rstrip('/') + '/login/'
