@@ -1,20 +1,68 @@
-url_prefix = /
-data_dir = data
-server = default  # options: default, nginx
+# Copy this file to "config.ini" and customize it.
+
+# video_dirs
+# ----------
+#
+# One or more directories to look for videos, separated by commas.
+#
 video_dirs = "/path/to/videodir1", "/path/to/videodir2", ...
+
+# url_prefix
+# ----------
+#
+# The location on your website under which this application is served
+#
+url_prefix = /
+
+# data_dir
+# --------
+#
+# Directory the application uses for storing all its data
+#
+data_dir = data
+
+# debug
+# -----
+#
+# Whether to run the web application with debug enabled.  Enabling
+# this on public web sites is insecure, but you can use it for
+# development etc.
+#
 debug = 0
 
-# Put some garbage here:
+# secret_key
+# ----------
+#
+# A secret key used in cookies etc. Just put some garbage in here.
+#
 secret_key = "daijdo0j12jdasdadas9vadv+0a0vknasadld09asdk"
 
-# Hosts that this server should serve to, if you have several virtual hosts
+# hostnames
+# ---------
+#
+# One or more host names that this server should serve to, if you have
+# several virtual hosts
+#
 hostnames = "localhost"
 
-# For serving video files directly from NGINX, you need to set
-# server=nginx above, run the application under NGINX, and add the
-# following to your NGINX configuration:
+# file_serving
+# ------------
 #
-# location <url_prefix>/streaming/ {
-#    internal;
-#    alias /path/to/mediasnake/data/streaming/;
-# }
+# The method used for e.g. streaming video files.
+#
+# - 'default': stream the file as usual from the web application.
+#
+# - 'nginx': allow the NGINX web server to serve the file directly.
+#   For this to work, you need to make sure the NGINX server process
+#   can read the video files, and to add the following to your NGINX
+#   configuration::
+#
+#       location /<same-url-prefix-as-in-this-file>/streaming/ {
+#           internal;
+#           alias /path/to/mediasnake/data/streaming/;
+#       }
+#
+# Allowing the web server to serve the files directly reduces the load
+# on the web application.
+#
+file_serving = default
