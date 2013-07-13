@@ -43,7 +43,7 @@ secret_key = "daijdo0j12jdasdadas9vadv+0a0vknasadld09asdk"
 # One or more host names that this server should serve to, if you have
 # several virtual hosts
 #
-hostnames = "localhost"
+hostnames = "127.0.0.1"
 
 # file_serving
 # ------------
