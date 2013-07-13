@@ -16,6 +16,10 @@ from django.core.urlresolvers import reverse
 
 import django.utils.timezone
 
+import logging
+
+logger = logging.getLogger('mediasnake')
+
 
 class VideoFile(models.Model):
     filename = models.CharField(max_length=16384, unique=True)
@@ -79,6 +83,8 @@ class VideoFile(models.Model):
 
         if not os.path.isdir(settings.SENDFILE_ROOT):
             os.makedirs(settings.SENDFILE_ROOT)
+
+        logger.info("Creating thumbnail for: '%s'" % self.filename)
 
         fd, tmpfn = tempfile.mkstemp(dir=settings.SENDFILE_ROOT, prefix='tmp-', suffix=".jpg")
         try:
@@ -184,6 +190,8 @@ def scan():
 
         for root in settings.MEDIASNAKEFILES_DIRS:
             for path, dirs, files in os.walk(root):
+                logger.info("Scanning directory: '%s'" % os.path.join(root, path))
+
                 # Insert new files
                 for file in files:
                     filename = os.path.normpath(os.path.join(root, path, file))
