@@ -71,7 +71,7 @@ class VideoFile(models.Model):
             raise RuntimeError("Not a file")
 
         # Create a deterministic thumbnail name
-        thumbnail = hash_filename_and_content(self.filename)
+        thumbnail = hash_content(self.filename)
         thumbnail_filename = get_thumbnail_filename(thumbnail)
 
         if self.thumbnail != thumbnail:
@@ -243,13 +243,13 @@ def get_mime_type(filename):
         return out.strip()
 
 
-def hash_filename_and_content(filename):
+def hash_content(filename):
     """
     Create a hex digest based on filename and (partial) file contents
     """
     block_size = 65536
 
-    content_hash = hashlib.sha1(filename)
+    content_hash = hashlib.sha1()
 
     with open(filename, 'rb') as f:
         block = f.read(block_size)
