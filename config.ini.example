@@ -6,6 +6,9 @@ video_dirs = "/path/to/videodir1", "/path/to/videodir2", ...
 # Put some garbage here:
 secret_key = "daijdo0j12jdasdadas9vadv+0a0vknasadld09asdk"
 
+# Hosts that this server should serve to, if you have several virtual hosts
+hostnames = "localhost"
+
 # For serving video files directly from NGINX, you need to set
 # server=nginx above, run the application under NGINX, and add the
 # following to your NGINX configuration:

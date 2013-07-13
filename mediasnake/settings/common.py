@@ -25,6 +25,15 @@ LOGIN_REDIRECT_URL = ini['url_prefix'].rstrip('/') + '/'
 SENDFILE_URL = ini['url_prefix'].rstrip('/') + '/streaming/'
 MEDIASNAKEFILES_DIRS = ini['video_dirs']
 
+SECRET_KEY = ini['secret_key']
+ALLOWED_HOSTS = ini['hostnames']
+
+ADMINS = (
+    # ('Your Name', 'your_email@example.com'),
+)
+
+MANAGERS = ADMINS
+
 STATICFILES_DIRS = (
     os.path.join(PROJECT_DIR, 'static'),
 )
