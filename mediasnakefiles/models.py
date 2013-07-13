@@ -110,6 +110,10 @@ class StreamingTicket(models.Model):
                                remote_address=remote_address,
                                timestamp=django.utils.timezone.now())
 
+    @property
+    def dummy_name(self):
+        return "file" + os.path.splitext(self.video_file.filename)[1]
+
     def is_valid(self, remote_address):
         return (self.timestamp >= StreamingTicket._threshold() and
                 self.remote_address == remote_address)

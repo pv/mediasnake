@@ -6,12 +6,15 @@
 <h1>{{ video_file.title }}</h1>
 
 <p>
-  <a href="{% url 'ticket' ticket.secret %}" class="btn btn-inverted">Direct link</a> (valid for 3 hours)
+  <a href="{% url 'ticket' ticket.secret %}{{ ticket.dummy_name}}" class="btn btn-inverted">Direct link</a> (valid for 3 hours)
 </p>
 
 <p>
-  <video width="320" controls>
-    <source src="{% url 'ticket' ticket.secret %}" type="{{ video_file.mimetype }}">
+  <video width="640" controls>
+    <source src="{% url 'ticket' ticket.secret %}{{ ticket.dummy_name}}" type="{{ video_file.mimetype }}">
+    <object data="{% url 'ticket' ticket.secret %}{{ ticket.dummy_name }}" type="{{ video_file.mimetype }}" width="640">
+      <embed src="{% url 'ticket' ticket.secret %}{{ ticket.dummy_name }}" width="640">
+    </object>
   </video>
 </p>
 {% endblock %}

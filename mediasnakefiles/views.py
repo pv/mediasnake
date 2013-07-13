@@ -78,6 +78,7 @@ def stream(request, id):
 
 
 def ticket_stream(request, secret):
+    secret = re.sub(r'\..*', '', secret)
     try:
         ticket = StreamingTicket.objects.get(secret=secret)
     except StreamingTicket.DoesNotExist:
@@ -88,8 +89,10 @@ def ticket_stream(request, secret):
 
     video_file = ticket.video_file
     filename = ticket.create_symlink()
-    return sendfile(request, filename, mimetype=video_file.mimetype,
-                    accept_ranges=True)
+    response = sendfile(request, filename, mimetype=video_file.mimetype,
+                        accept_ranges=True)
+    response['Content-Disposition'] = 'inline; filename=\"%s\"' % ticket.dummy_name
+    return response
 
 
 @login_required
