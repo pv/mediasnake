@@ -3,6 +3,9 @@ import re
 
 from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseForbidden
+from django.core.cache import cache
+from django.views.decorators.cache import cache_page
+from django.views.decorators.cache import cache_control
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
@@ -26,6 +29,8 @@ class _VideoGroup(object):
 
 
 @login_required
+@cache_page(30*24*60*60)
+@cache_control(must_revalidate=True, max_age=30*24*60*60)
 def index(request):
     video_files = VideoFile.objects.all()
     video_groups = []
@@ -43,6 +48,8 @@ def index(request):
 
 
 @login_required
+@cache_page(30*24*60*60)
+@cache_control(must_revalidate=True, max_age=30*24*60*60)
 def thumbnail(request, id):
     try:
         video_file = VideoFile.objects.get(pk=id)
@@ -100,6 +107,10 @@ def rescan(request):
     if not request.user.is_staff:
         return HttpResponseForbidden()
 
+    # Invalidate the cache
+    cache.clear()
+
+    # Proceed with scanning
     scan()
 
     return redirect(index)

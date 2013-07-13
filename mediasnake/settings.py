@@ -50,6 +50,13 @@ DATABASES = {
     }
 }
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': os.path.join(ini['data_dir'], 'django_cache'),
+    }
+}
+
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
