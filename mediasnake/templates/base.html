@@ -19,8 +19,10 @@
       <div class="navbar-inner">
 	<a class="brand" href="#">Mediasnake</a>
 	<ul class="nav">
+	  {% if user.is_authenticated %}
 	  <li {% if '/account/' not in request.path and '/admin/' not in request.path %}class="active"{% endif %}><a href="{% url 'index' %}">Videos</a></li>
 	  <li {% if '/account/' in request.path %}class="active"{% endif %}><a href="{% url 'django.contrib.auth.views.password_change' %}">Account</a></li>
+	  {% endif %}
           {% if user.is_active and user.is_staff %}
 	  <li {% if '/admin/' in request.path %}class="active"{% endif %}><a href="{% url 'admin:index' %}">Admin</a></li>
 	  {% endif %}
