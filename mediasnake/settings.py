@@ -2,8 +2,8 @@ import os
 import django.conf.global_settings as DEFAULT_SETTINGS
 from mediasnake.iniconfig import ini
 
-DATA_DIR = os.path.join(os.path.dirname(__file__), '..', '..', ini['data_dir'])
-PROJECT_DIR = os.path.join(os.path.dirname(__file__), '..')
+PROJECT_DIR = os.path.abspath(os.path.dirname(__file__))
+DATA_DIR = os.path.abspath(os.path.join(PROJECT_DIR, '..', ini['data_dir']))
 
 TIME_ZONE = 'America/Chicago'
 LANGUAGE_CODE = 'en-us'
@@ -27,6 +27,20 @@ MEDIASNAKEFILES_DIRS = ini['video_dirs']
 
 SECRET_KEY = ini['secret_key']
 ALLOWED_HOSTS = ini['hostnames']
+
+DEBUG = ini['debug']
+TEMPLATE_DEBUG = DEBUG
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',           # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': os.path.join(DATA_DIR, 'mediasnake.db'),  # Or path to database file if using sqlite3.
+        'USER': '',                                       # Not used with sqlite3.
+        'PASSWORD': '',                                   # Not used with sqlite3.
+        'HOST': '',                                       # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '',                                       # Set to empty string for default. Not used with sqlite3.
+    }
+}
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -88,6 +102,14 @@ INSTALLED_APPS = (
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
@@ -106,11 +128,20 @@ LOGGING = {
         },
     },
     'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
+        'django': {
+            'handlers': ['file'],
+            'level': 'INFO',
             'propagate': True,
         },
+        'django.request': {
+            'handlers': ['mail_admins', 'file'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': True,
+        },
+        'mediasnake': {
+            'handlers': ['mail_admins', 'file'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+        }
     }
 }
 

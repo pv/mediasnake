@@ -11,6 +11,7 @@ file_serving = option(default, nginx)
 hostnames = list()
 video_dirs = list()
 secret_key = string()
+debug = boolean()
 """
 
 CONFIG_FILE = os.path.normpath(

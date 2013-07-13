@@ -2,6 +2,7 @@ url_prefix = /
 data_dir = data
 server = default  # options: default, nginx
 video_dirs = "/path/to/videodir1", "/path/to/videodir2", ...
+debug = 0
 
 # Put some garbage here:
 secret_key = "daijdo0j12jdasdadas9vadv+0a0vknasadld09asdk"
