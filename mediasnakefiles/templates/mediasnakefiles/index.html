@@ -9,7 +9,9 @@
   {% for video_group in video_groups %}
   <div class="accordion-group">
     <div class="accordion-heading">
-      <a class="accordion-toggle" data-toggle="collapse" data-parent="video-list" href="#video-group-{{ forloop.counter }}">{{ video_group.name }}</a>
+      <a class="accordion-toggle" 
+         data-toggle="collapse" data-parent="video-list" 
+         href="#video-group-{{ forloop.counter }}">{{ video_group.name }}</a>
     </div>
     <div id="video-group-{{ forloop.counter }}" class="accordion-body collapse">
       <div class="accordion-inner">
@@ -17,7 +19,10 @@
 	{% for video_file in video_group.video_files %}
 	<li class="media">
 	  <a class="pull-left" href="#">
-	    <img width=190 class="media-object" src="{% url 'thumbnail' video_file.id %}">
+            {# The image is loaded by Javascript (see below) when the accordion is expanded. #}
+	    <img width=190 class="media-object not-loaded"
+                 src="{{ STATIC_URL }}mediasnake/img/grey.gif"
+                 data-original="{% url 'thumbnail' video_file.id %}">
 	  </a>
 	  <div class="media-body">
 	    <h4>{{ video_file.title }}</h4>
@@ -32,4 +37,18 @@
   </div>
   {% endfor %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+
+{# Delayed image loading #}
+
+$('.accordion-body').on('show', function () {
+    $(this).find('img.not-loaded').attr('src', function() {
+        $(this).removeClass('not-loaded');
+        return $(this).attr('data-original');
+    });
+})
+</script>
 {% endblock %}
