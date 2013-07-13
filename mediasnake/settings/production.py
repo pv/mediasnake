@@ -20,6 +20,6 @@ DATABASES = {
     }
 }
 
-SECRET_KEY = ''
+SECRET_KEY = ini['secret_key']
 
 ALLOWED_HOSTS = []

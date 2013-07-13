@@ -16,7 +16,7 @@ DATABASES = {
     }
 }
 
-SECRET_KEY = ini['secret_key']
+SECRET_KEY = 'some secret, not important'
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.4/ref/settings/#allowed-hosts

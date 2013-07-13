@@ -9,6 +9,7 @@ url_prefix = string(default=/)
 data_dir = string(default=data)
 server = option('default', 'nginx', default='default')
 video_dirs = list()
+secret_key = string()
 """
 
 CONFIG_FILE = os.path.normpath(
