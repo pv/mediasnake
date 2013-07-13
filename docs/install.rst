@@ -172,9 +172,11 @@ only need to create a configuration file
 ``/etc/supervisor/conf.d/mediasnake.conf``::
 
     [program:mediasnake]
-    command = uwsgi_python -H env --socket data/uwsgi.sock --mount=/mediasnake=mediasnake/wsgi.py
+    command = uwsgi_python -H env --socket data/uwsgi.sock --mount=/mediasnake=mediasnake/wsgi.py -M -p 4
     directory = /srv/mediasnake
     user = www-data
+
+This spawns 4 worker processes.
 
 Now do::
 
