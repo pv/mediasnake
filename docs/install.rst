@@ -188,6 +188,52 @@ The ``supervisorctl`` should indicate the process is now running. The
 site should now be ready to go.
 
 
+Streaming on HTTP, serving on HTTPS
+===================================
+
+It turns out that SSL, self-signed certificates in particular, cause
+major pain for would-be player applications. It then makes sense to
+stream the video content over plain HTTP.
+
+The security implications of this are not extremely bad:
+
+- Authentication information is not sent over HTTP.
+- The streaming URL is locked to a single IP address.
+- It is only valid for a couple of hours.
+- The URL address does not contain information about the file name.
+- It is not possible to browse the collection via HTTP.
+
+A man-in-the-middle party snooping on you (e.g., someone on your local
+network, or your ISP or government) will mostly find out that you
+watched some video. Unless they act fast or record ALL network traffic,
+they don't get much wiser than that.
+
+It is now assumed that you have followed the above instructions, and
+configured the service to go through a SSL enabled virtual host.
+
+We also assume that you have a second virtual host for serving HTTP.
+If not, you need to add it.
+
+The configuration for this case is as follows: first change in your
+``config.ini``::
+
+    http_streaming_address = http://mysite.com:80/
+
+where the site and the port number correspond to your HTTP virtual
+host.
+
+You should now configure Mediasnake on the HTTP virtual host. The
+configuration goes exactly the same as on the other virtual host.
+
+When ``http_streaming_address`` is set in the configuration file,
+Mediasnake will only serve streaming tickets if it notices the virtual
+host doesn't have SSL. Moreover, the authentication cookies are set
+SSL-only, so they are not transmitted unencrypted.
+
+However, if you had an active logged-in session going, you should log
+out, so that the cookie gets its correct SSL-only status!
+
+
 Troubleshooting
 ===============
 
