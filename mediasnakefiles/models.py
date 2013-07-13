@@ -97,6 +97,8 @@ class VideoFile(models.Model):
         except:
             os.unlink(tmpfn)
 
+    def __str__(self):
+        return "VideoFile: '%s/%s'" % (self.relative_dirname, self.basename)
 
 class StreamingTicket(models.Model):
     secret = models.CharField(max_length=128, null=False, unique=True)

@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 
 from mediasnake_sendfile import sendfile
 
-from mediasnakefiles.models import VideoFile, StreamingTicket
+from mediasnakefiles.models import VideoFile, StreamingTicket, scan
 
 
 def _sort_key(video_file):
@@ -26,7 +26,7 @@ class _VideoGroup(object):
 
 
 @login_required
-def list(request):
+def index(request):
     video_files = VideoFile.objects.all()
     video_groups = []
 
@@ -39,7 +39,7 @@ def list(request):
             group.video_files.append(video_file)
 
     context = {'video_groups': video_groups}
-    return render(request, "mediasnakefiles/list.html", context)
+    return render(request, "mediasnakefiles/index.html", context)
 
 
 @login_required
@@ -88,3 +88,13 @@ def ticket_stream(request, secret):
     filename = ticket.create_symlink()
     return sendfile(request, filename, mimetype=video_file.mimetype,
                     accept_ranges=True)
+
+
+@login_required
+def rescan(request):
+    if not request.user.is_staff:
+        return HttpResponseForbidden()
+
+    scan()
+
+    return redirect(index)

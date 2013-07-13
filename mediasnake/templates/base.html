@@ -10,11 +10,29 @@
     <link type="text/css" href="{{ STATIC_URL }}bootstrap/css/bootstrap-responsive.min.css?version=2.3.2" rel="stylesheet">
     <link type="text/css" href="{{ STATIC_URL }}mediasnake/css/base.css?version={{ MEDIASNAKE_VERSION }}" rel="stylesheet">
 
-    {% block extra_head %}{% endblock %}
+    {% block extrastyle %}{% endblock %}
+    {% block extrahead %}{% endblock %}
   </head>
-  <body>
+  <body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}">
+    {% block header %}
+    <div class="navbar">
+      <div class="navbar-inner">
+	<a class="brand" href="#">Mediasnake</a>
+	<ul class="nav">
+	  <li {% if request.path == '/' %}class="active"{% endif %}><a href="{% url 'index' %}">Videos</a></li>
+	  <li {% if request.path == '/account/' %}class="active"{% endif %}><a href="{% url 'django.contrib.auth.views.password_change' %}">Account</a></li>
+          {% if user.is_active and user.is_staff %}
+	  <li {% if '/admin/' in request.path %}class="active"{% endif %}><a href="{% url 'admin:index' %}">Admin</a></li>
+	  {% endif %}
+	</ul>
+      </div>
+    </div>
+    {% endblock %}
     <div class="container">
-      {% block content %}{% endblock %}
+      {% block body %}
+      {% block content %}
+      {% endblock %}
+      {% endblock %}
     </div>
     <script type="text/javascript" src="{{ STATIC_URL }}jquery/js/jquery.min.js?version=2.0.3"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}bootstrap/js/bootstrap.min.js?version=2.3.2"></script>
