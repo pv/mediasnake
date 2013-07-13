@@ -1,0 +1,16 @@
+url_prefix = /
+data_dir = data
+server = default  # options: default, nginx
+video_dirs = "/path/to/videodir1", "/path/to/videodir2", ...
+
+# Put some garbage here:
+secret_key = "daijdo0j12jdasdadas9vadv+0a0vknasadld09asdk"
+
+# For serving video files directly from NGINX, you need to set
+# server=nginx above, run the application under NGINX, and add the
+# following to your NGINX configuration:
+#
+# location <url_prefix>/streaming/ {
+#    internal;
+#    alias /path/to/mediasnake/data/streaming/;
+# }

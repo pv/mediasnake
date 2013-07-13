@@ -1,7 +1,8 @@
 import os
 import django.conf.global_settings as DEFAULT_SETTINGS
+from mediasnake.iniconfig import ini
 
-DATA_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'data')
+DATA_DIR = os.path.join(os.path.dirname(__file__), '..', '..', ini['data_dir'])
 PROJECT_DIR = os.path.join(os.path.dirname(__file__), '..')
 
 TIME_ZONE = 'America/Chicago'
@@ -13,11 +14,16 @@ USE_TZ = True
 
 MEDIA_ROOT = os.path.join(DATA_DIR, 'media')
 STATIC_ROOT = os.path.join(DATA_DIR, 'static')
+SENDFILE_ROOT = os.path.join(DATA_DIR, 'streaming')
 
-MEDIA_URL = '/media/'
-STATIC_URL = '/static/'
-LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/'
+SENDFILE_BACKEND = 'mediasnake_sendfile.backends.simple'
+
+MEDIA_URL = ini['url_prefix'].rstrip('/') + '/media/'
+STATIC_URL = ini['url_prefix'].rstrip('/') + '/static/'
+LOGIN_URL = ini['url_prefix'].rstrip('/') + '/login/'
+LOGIN_REDIRECT_URL = ini['url_prefix'].rstrip('/') + '/'
+SENDFILE_URL = ini['url_prefix'].rstrip('/') + '/streaming/'
+MEDIASNAKEFILES_DIRS = ini['video_dirs']
 
 STATICFILES_DIRS = (
     os.path.join(PROJECT_DIR, 'static'),
@@ -99,17 +105,8 @@ LOGGING = {
     }
 }
 
-
-MEDIASNAKEFILES_DIRS = [
-    os.path.join(DATA_DIR, 'videos'),
-]
 MEDIASNAKEFILES_MIMETYPES = (
     "video/*",
-    ""
 )
 MEDIASNAKEFILES_TICKET_LIFETIME_HOURS = 3
 MEDIASNAKEFILES_FFMPEGTHUMBNAILER = "ffmpegthumbnailer"
-
-SENDFILE_BACKEND = 'mediasnake_sendfile.backends.simple'
-SENDFILE_ROOT = os.path.join(DATA_DIR, 'streaming')
-SENDFILE_URL = '/stream_file/'
