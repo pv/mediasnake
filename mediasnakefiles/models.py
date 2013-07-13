@@ -341,6 +341,11 @@ def spawn_rescan():
     devnull_w = open('/dev/null', 'wb')
     devnull_r = open('/dev/null', 'wb')
 
-    subprocess.Popen([sys.executable, manage_py, 'rescan'],
+    python = sys.executable
+    env_python = os.path.join(base_dir, 'env', 'bin', 'python')
+    if os.path.isfile(env_python):
+        python = env_python
+
+    subprocess.Popen([python, manage_py, 'rescan'],
                      stdin=devnull_r, stdout=devnull_w, stderr=devnull_r,
                      cwd=base_dir, close_fds=True)
