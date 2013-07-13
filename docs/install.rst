@@ -34,11 +34,11 @@ Prerequisites
 
 If you are using Apache::
 
-    apt-get install python-virtualenv libapache2-mod-wsgi
+    apt-get install python-virtualenv ffmpegthumbnailer libapache2-mod-wsgi
 
 If you are using NGINX + uWSGI + Supervisord::
 
-    apt-get install python-virtualenv supervisor uwsgi-plugin-python
+    apt-get install python-virtualenv ffmpegthumbnailer supervisor uwsgi-plugin-python
 
 If you want something else, take a look at
 https://docs.djangoproject.com/en/1.5/howto/deployment/
@@ -63,31 +63,32 @@ configuration, see below.  The ``hostnames`` need to match the names
 of your virtual hosts.
 
 
-Initialization
-==============
-
-Run::
-
-    python bootstrap.py
-
-This will download and install all dependencies, and ask you to create
-a superuser account and a password.
-
-The system uses a Sqlite database stored in the ``data/`` directory.
-
-
 File permissions
 ================
 
 Set the file permissions so that the web and app servers can access
 the data files::
 
+    mkdir env
     chmod a+rX -R /srv/mediasnake/
-    chgrp www-data -R data/
-    chmod ug=rwX,o= -R data/
+    chgrp www-data -R data/ env/
+    chmod ug=rwX,o= -R data/ env/
 
 Moreover, you need to make sure the www-data user or group can
 actually read the video files that you plan to serve.
+
+
+Initialization
+==============
+
+Run::
+
+    sudo -u www-data python bootstrap.py
+
+This will download and install all dependencies into a directory
+``env/``, and ask you to create a superuser account and a password.
+
+The system uses a Sqlite database stored in the ``data/`` directory.
 
 
 Web server configuration (Apache)
@@ -131,8 +132,9 @@ Now, do::
 This also needs to be done after every time you change ``config.ini``.
 
 You should be able to browse to http://yoursite/mediasnake/ There, log
-in, and go to the admin tab. Press "Rescan for Videos" and you should
-be all set!
+in, and go to the admin tab. Press "Rescan for Videos" and wait ---
+this may take some time as it generates all video thumbnails at once.
+After that, you should be all set!
 
 
 Web server configuration (NGINX)
