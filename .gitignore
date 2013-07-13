@@ -12,6 +12,7 @@
 .\#*
 .tox
 _configtest.c
+/docs/_build
 /build
 /dist
 /data
