@@ -43,7 +43,7 @@ function pollStatus(){
         if (data['complete']) {
             complete_count += 1;
         }
-        if (complete_count > 3) {
+        if (complete_count > 5) {
             $('#status').html('Scan complete!');
         }
         else {
