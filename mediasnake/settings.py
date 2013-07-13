@@ -16,7 +16,10 @@ MEDIA_ROOT = os.path.join(DATA_DIR, 'media')
 STATIC_ROOT = os.path.join(DATA_DIR, 'static')
 SENDFILE_ROOT = os.path.join(DATA_DIR, 'streaming')
 
-SENDFILE_BACKEND = 'mediasnake_sendfile.backends.simple'
+if ini['file_serving'] == 'nginx':
+    SENDFILE_BACKEND = 'mediasnake_sendfile.backends.nginx'
+else:
+    SENDFILE_BACKEND = 'mediasnake_sendfile.backends.simple'
 
 MEDIA_URL = ini['url_prefix'].rstrip('/') + '/media/'
 STATIC_URL = ini['url_prefix'].rstrip('/') + '/static/'
