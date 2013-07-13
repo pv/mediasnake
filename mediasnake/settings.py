@@ -81,6 +81,9 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
+if MEDIASNAKEFILE_HTTP_ADDRESS:
+    MIDDLEWARE_CLASSES += ('mediasnake.middleware.SSLEnforcer',)
+
 ROOT_URLCONF = 'mediasnake.urls'
 
 WSGI_APPLICATION = 'mediasnake.wsgi.application'
