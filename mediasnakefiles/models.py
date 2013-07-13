@@ -1,4 +1,5 @@
 import os
+import sys
 import re
 import hmac
 import subprocess
@@ -7,6 +8,7 @@ import hashlib
 import datetime
 import fnmatch
 import random
+import json
 
 from django.db import models, transaction
 from django.conf import settings
@@ -16,9 +18,14 @@ from django.core.urlresolvers import reverse
 
 import django.utils.timezone
 
+from mediasnakefiles.lockfile import LockFile, LockFileError
+
 import logging
 
 logger = logging.getLogger('mediasnake')
+
+SCAN_LOCKFILE = os.path.join(settings.DATA_DIR, 'rescan.lock')
+SCAN_STATUS = os.path.join(settings.DATA_DIR, 'rescan.txt')
 
 
 class VideoFile(models.Model):
@@ -79,12 +86,10 @@ class VideoFile(models.Model):
             self.save()
 
         if os.path.isfile(thumbnail_filename):
-            return
+            return False
 
         if not os.path.isdir(settings.SENDFILE_ROOT):
             os.makedirs(settings.SENDFILE_ROOT)
-
-        logger.info("Creating thumbnail for: '%s'" % self.filename)
 
         fd, tmpfn = tempfile.mkstemp(dir=settings.SENDFILE_ROOT, prefix='tmp-', suffix=".jpg")
         try:
@@ -97,11 +102,13 @@ class VideoFile(models.Model):
                                  stdout=subprocess.PIPE)
             p.communicate()
             if p.returncode != 0:
-                return
+                return False
 
             os.rename(tmpfn, thumbnail_filename)
         except:
             os.unlink(tmpfn)
+
+        return True
 
     def __str__(self):
         return "VideoFile: '%s/%s'" % (self.relative_dirname, self.basename)
@@ -185,48 +192,91 @@ def scan():
     Scan the video directories for files.
     """
 
-    with transaction.commit_on_success():
-        existing_files = set()
+    try:
+        with LockFile(SCAN_LOCKFILE, fail_if_active=True):
+            with transaction.commit_on_success():
+                existing_files = set()
 
-        for root in settings.MEDIASNAKEFILES_DIRS:
-            for path, dirs, files in os.walk(root):
-                logger.info("Scanning directory: '%s'" % os.path.join(root, path))
+                for root in settings.MEDIASNAKEFILES_DIRS:
+                    for path, dirs, files in os.walk(root):
+                        msg = "Scanning directory: '%s'" % os.path.join(root, path)
+                        logger.info(msg)
+                        set_scan_status(msg)
 
-                # Insert new files
-                for file in files:
-                    filename = os.path.normpath(os.path.join(root, path, file))
-                    mimetype = get_mime_type(filename)
+                        # Insert new files
+                        for file in files:
+                            filename = os.path.normpath(os.path.join(root, path, file))
+                            mimetype = get_mime_type(filename)
 
-                    # Check that the mime type is a video type
-                    for pattern in settings.MEDIASNAKEFILES_MIMETYPES:
-                        if fnmatch.fnmatch(mimetype, pattern):
-                            break
-                    else:
-                        continue
+                            # Check that the mime type is a video type
+                            for pattern in settings.MEDIASNAKEFILES_MIMETYPES:
+                                if fnmatch.fnmatch(mimetype, pattern):
+                                    break
+                            else:
+                                continue
 
-                    existing_files.add(filename)
+                            existing_files.add(filename)
 
-                    # Check if the file is already there
-                    try:
-                        video_file = VideoFile.objects.get(filename=filename)
-                        continue
-                    except VideoFile.DoesNotExist:
-                        pass
+                            # Check if the file is already there
+                            try:
+                                video_file = VideoFile.objects.get(filename=filename)
+                                continue
+                            except VideoFile.DoesNotExist:
+                                pass
 
-                    # Create it
-                    video_file = VideoFile(filename=filename, mimetype=mimetype)
-                    video_file.save()
+                            # Create it
+                            video_file = VideoFile(filename=filename, mimetype=mimetype)
+                            video_file.save()
 
-        # Remove non-existing files
-        files_in_db = set(VideoFile.objects.values_list('filename', flat=True))
-        to_remove = files_in_db.difference(existing_files)
-        for filename in to_remove:
-            VideoFile.objects.get(filename=filename).delete()
+            # Remove non-existing files
+            msg = "Cleaning up non-existing video entries..."
+            logger.info(msg)
+            set_scan_status(msg)
 
-    # Create thumbnails, if missing
-    for video_file in VideoFile.objects.all():
-        video_file.create_thumbnail()
+            files_in_db = set(VideoFile.objects.values_list('filename', flat=True))
+            to_remove = files_in_db.difference(existing_files)
+            for filename in to_remove:
+                VideoFile.objects.get(filename=filename).delete()
 
+            # Create thumbnails, if missing
+            objects = VideoFile.objects.all()
+            for video_file in objects:
+                if video_file.create_thumbnail():
+                    msg = "Creating thumbnails: %r" % (video_file.filename,)
+                    logger.info(msg)
+                    set_scan_status(msg)
+
+            msg = "Scan complete"
+            logger.info(msg)
+            set_scan_status(None)
+
+            return True
+    except LockFileError:
+        return False
+
+
+def set_scan_status(status):
+    if status is None:
+        try:
+            os.unlink(SCAN_STATUS)
+        except OSError:
+            pass
+        return
+
+    now = django.utils.timezone.now()
+    timestamp = now.strftime('%Y-%m-%d %H:%M:%S %Z')
+
+    with open(SCAN_STATUS, 'wb') as f:
+        obj = {'status': status, 'timestamp': timestamp}
+        json.dump(obj, f)
+
+
+def get_scan_status():
+    if LockFile.check(SCAN_LOCKFILE):
+        with open(SCAN_STATUS, 'rb') as f:
+            return f.read()
+    return None
+  
 
 def get_thumbnail_filename(thumbnail):
     thumbnail = re.sub('[^a-f0-9]', '', thumbnail)
@@ -282,3 +332,15 @@ def get_secret_128(salt=""):
 
 def get_random_bytes(nbytes):
     return "".join(chr(random.getrandbits(8)) for _ in range(nbytes))
+
+
+def spawn_rescan():
+    base_dir = os.path.abspath(os.path.join(settings.PROJECT_DIR, '..'))
+    manage_py = os.path.join(base_dir, 'manage.py')
+
+    devnull_w = open('/dev/null', 'wb')
+    devnull_r = open('/dev/null', 'wb')
+
+    subprocess.Popen([sys.executable, manage_py, 'rescan'],
+                     stdin=devnull_r, stdout=devnull_w, stderr=devnull_r,
+                     cwd=base_dir, close_fds=True)

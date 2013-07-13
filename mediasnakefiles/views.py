@@ -1,8 +1,9 @@
 import os
 import re
+import time
 
 from django.conf import settings
-from django.http import HttpResponse, Http404, HttpResponseForbidden
+from django.http import HttpResponse, Http404, HttpResponseForbidden, StreamingHttpResponse
 from django.core.cache import cache
 from django.views.decorators.cache import cache_page
 from django.views.decorators.cache import cache_control
@@ -11,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 
 from mediasnake_sendfile import sendfile
 
-from mediasnakefiles.models import VideoFile, StreamingTicket, scan
+from mediasnakefiles.models import VideoFile, StreamingTicket, scan, get_scan_status, spawn_rescan
 
 
 def _sort_key(video_file):
@@ -107,10 +108,23 @@ def rescan(request):
     if not request.user.is_staff:
         return HttpResponseForbidden()
 
-    # Invalidate the cache
-    cache.clear()
+    if request.method != 'POST':
+        return redirect(index)
 
-    # Proceed with scanning
-    scan()
+    spawn_rescan()
 
-    return redirect(index)
+    time.sleep(0.5)
+
+    context = {}
+    return render(request, "mediasnakefiles/rescan.html", context)
+
+
+@login_required
+def rescan_status(request):
+    if not request.user.is_staff:
+        return HttpResponseForbidden()
+
+    status = get_scan_status()
+    if status is None:
+        return HttpResponse('{"complete": true}', content_type="application/json")
+    return HttpResponse(status, content_type="application/json")

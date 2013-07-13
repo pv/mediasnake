@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Scanning for video files{% endblock %}
+
+{% block content %}
+
+<h1>Scanning for video files</h1>
+
+<div>
+  <pre id="status" style="height: 10pc; overflow-y: scroll;">Scanning...</pre>
+</div>
+
+<noscript>
+<p>
+  You don't have javascript enabled. You can look at the progress <a href="{% url 'rescan-status' %}">here</a>
+</p>
+</noscript>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+var complete_count = 0;
+var poll_count = 0;
+var last_timestamp = "";
+var walker = ["*....", ".*...", "..*..", "...*.", "....*"];
+
+function pollStatus(){
+    $.get('{% url 'rescan-status' %}', function(data) {
+        poll_count += 1;
+
+        if (data['timestamp'] != last_timestamp && data['status']) {
+            var text = data['status'];
+            text = $('#status').text().replace(/\n\r[ .*]*$/, '') + "\n\r[" + data['timestamp'] + "]  " + text;
+            $('#status').text(text);
+            last_timestamp = data['timestamp'];
+        }
+        else {
+            var text = $('#status').text();
+            text = text.replace(/\n\r[ .*]*$/, '') + "\n\r" + walker[poll_count % walker.length];
+            $('#status').text(text);
+        }
+        if (data['complete']) {
+            complete_count += 1;
+        }
+        if (complete_count > 3) {
+            $('#status').html('Scan complete!');
+        }
+        else {
+            setTimeout(pollStatus, 2000);
+        }
+        $('#status').scrollTop($('#status')[0].scrollHeight);
+    });
+}
+
+$(document).ready(function () {
+    pollStatus();
+});
+</script>
+{% endblock %}

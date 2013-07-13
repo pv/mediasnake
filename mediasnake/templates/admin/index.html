@@ -13,7 +13,10 @@
 
 <div class="container">
   <p>
-    <a class="btn btn-inverted" href="{% url 'rescan' %}">Rescan for videos</a>
+    <form action="{% url 'rescan' %}" method='post'>
+      {% csrf_token %}
+      <input type="submit" class="btn btn-inverted" value="Rescan for videos">
+    </form>
   </p>
   <p>
     Directories to scan (specified in <tt>config.ini</tt>):
@@ -22,6 +25,10 @@
       <li>{{dirname}}</li>
       {% endfor %}
     </ul>
+  </p>
+  <p>
+    Alternatively, log on the server and do
+    <tt>./manage.py rescan</tt>
   </p>
 </div>
 

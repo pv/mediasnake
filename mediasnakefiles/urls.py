@@ -7,5 +7,6 @@ urlpatterns = patterns('',
     url(r'^thumbnail/(?P<id>\d+)/$', views.thumbnail, name='thumbnail'),
     url(r'^stream/(?P<id>\d+)/$', views.stream, name='stream'),
     url(r'^ticket/(?P<secret>[a-z0-9.]+)/.*$', views.ticket_stream, name='ticket'),
-    url(r'^rescan/$', views.rescan, name='rescan')
+    url(r'^rescan/$', views.rescan, name='rescan'),
+    url(r'^rescan/status/$', views.rescan_status, name='rescan-status'),
 )
