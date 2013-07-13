@@ -12,6 +12,8 @@ from django.db import models, transaction
 from django.conf import settings
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
+from django.core.urlresolvers import reverse
+
 import django.utils.timezone
 
 
@@ -48,6 +50,7 @@ class VideoFile(models.Model):
         title = re.sub(r'[_-]', ' ', title)
         title = re.sub(r'\s+', ' ', title)
         title = title.strip()
+        
         if title:
             return title[0].upper() + title[1:]
         else:
@@ -113,6 +116,17 @@ class StreamingTicket(models.Model):
     @property
     def dummy_name(self):
         return "file" + os.path.splitext(self.video_file.filename)[1]
+
+    @property
+    def url(self):
+        if settings.MEDIASNAKEFILE_HTTP_ADDRESS:
+            url = (settings.MEDIASNAKEFILE_HTTP_ADDRESS.rstrip('/')
+                   + '/' + settings.ini['url_prefix'].strip('/')
+                   + '/streaming/' + self.dummy_name)
+            return url
+        else:
+            return (reverse('ticket', args=[self.secret]).rstrip('/')
+                    + '/' + self.dummy_name)
 
     def is_valid(self, remote_address):
         return (self.timestamp >= StreamingTicket._threshold() and

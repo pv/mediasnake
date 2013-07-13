@@ -15,6 +15,7 @@ hostnames = list()
 video_dirs = list()
 secret_key = string()
 debug = boolean()
+http_streaming_address = string()
 """
 
 CONFIG_FILE = os.path.normpath(

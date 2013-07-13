@@ -67,3 +67,34 @@ hostnames = "localhost", "127.0.0.1"
 # on the web application.
 #
 file_serving = default
+
+
+# http_streaming_address
+# ----------------------
+#
+# When specified, the streaming URLs are always over HTTP.
+#
+# This option is useful only if you are hosting the app on HTTPS, but
+# would like to stream the videos on HTTP.
+#
+# One motivation to do this could be that you are using a self-signed
+# SSL certificate, and it is causing problems for applications you'd
+# like to play the streams with.
+#
+# Only video stream data is transmitted over HTTP in this
+# mode. Moreover, the streaming tickets do not contain information
+# about the original file name, apart from the file type.
+#
+# The streaming tickets can only be used for watching a specific
+# video, are locked to your IP address, and time out after a couple of
+# hours.
+#
+# Examples:
+#
+# # Default behavior
+# http_streaming_address =
+#
+# # Different port
+# http_streaming_address = http://mysite.com:1234/
+#
+http_streaming_address =

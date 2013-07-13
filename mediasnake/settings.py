@@ -31,6 +31,10 @@ MEDIASNAKEFILES_DIRS = ini['video_dirs']
 SECRET_KEY = ini['secret_key']
 ALLOWED_HOSTS = ini['hostnames']
 
+MEDIASNAKEFILE_HTTP_ADDRESS = ini['http_streaming_address'].strip()
+if MEDIASNAKEFILE_HTTP_ADDRESS:
+    SESSION_COOKIE_SECURE = True
+
 DEBUG = ini['debug']
 TEMPLATE_DEBUG = DEBUG
 
