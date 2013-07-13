@@ -56,7 +56,7 @@ Change the following options::
     video_dirs = "/home/data/My Videos", "/home/data/More of My Videos"
     hostnames = "localhost", "127.0.0.1", "mysite.com"
 
-Of course, choose the above two video directories accordingly.  The
+Of course, choose the above two video directories as you like.  The
 ``url_prefix`` above is something that needs to match your web server
 configuration, see below.  The ``hostnames`` need to match the names
 of your virtual hosts.
@@ -85,7 +85,7 @@ Run::
     sudo -u www-data python bootstrap.py
 
 This will download and install all dependencies into a directory
-``env/``, and ask you to create a superuser account and a password.
+``env/``, and ask you to create a user account and a password.
 
 The system uses a Sqlite database stored in the ``data/`` directory.
 
