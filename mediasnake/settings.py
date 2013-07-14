@@ -169,5 +169,5 @@ MEDIASNAKEFILES_ACCEPTED_FILE_TYPES = (
     ("*.ogm", "application/ogg", "video/ogg"),
     ("*.ogv", "application/ogg", "video/ogg"),
 )
-MEDIASNAKEFILES_TICKET_LIFETIME_HOURS = 3
+MEDIASNAKEFILES_TICKET_LIFETIME_HOURS = 5
 MEDIASNAKEFILES_FFMPEGTHUMBNAILER = "ffmpegthumbnailer"

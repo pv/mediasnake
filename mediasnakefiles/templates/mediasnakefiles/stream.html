@@ -6,7 +6,7 @@
 <h1>{{ video_file.title }}</h1>
 
 <p>
-  <a href="{{ ticket.url }}" type="{{ video_file.mimetype }}" class="btn btn-inverted">Direct link</a> (valid for 3 hours)
+  <a href="{{ ticket.url }}" type="{{ video_file.mimetype }}" class="btn btn-inverted">Direct link</a> (valid for {{ TICKET_LIFETIME_HOURS }} hours)
 </p>
 
 <p>
