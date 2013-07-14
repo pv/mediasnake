@@ -1,0 +1,40 @@
+/* -*- css -*- */
+
+@import url("basic.css");
+
+a.headerlink {
+    display: none !important;
+}
+
+h1, h2, h3, h4, h5 {
+    color: #555555;
+}
+
+h1 {
+    margin-bottom: 30px;
+}
+
+h2 {
+    margin-top: 25px;
+    font-size: 24px;
+}
+
+h3 {
+    font-size: 20px;
+}
+
+h4 {
+    font-size: 18px;
+}
+
+#main-container ul li {
+    line-height: 25px;
+}
+
+#main-container .toctree-wrapper {
+    margin-top: 20px;
+}
+
+#main-container .toctree-wrapper ul li {
+    line-height: 30px;
+}

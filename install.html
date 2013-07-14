@@ -1,0 +1,307 @@
+
+
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="utf-8">
+    
+    <title>Installation &mdash; Mediasnake 0.1 documentation</title>
+    
+    <link type="text/css" href="_static/bootstrap/css/bootstrap.min.css?version=2.3.2" rel="stylesheet">
+    <link type="text/css" href="_static/bootstrap/css/bootstrap-responsive.min.css?version=2.3.2" rel="stylesheet">
+    <link type="text/css" href="_static/mediasnake/css/base.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="_static/mediasnake.css" type="text/css" >
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" >
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery/js/jquery.min.js?version=2.0.3"></script>
+    <script type="text/javascript" src="_static/bootstrap/js/bootstrap.min.js?version=2.3.2"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Mediasnake 0.1 documentation" href="index.html" >
+    <link rel="next" title="Usage" href="usage.html" >
+    <link rel="prev" title="Mediasnake" href="index.html" > 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body class="">
+    <a href="https://github.com/pv/mediasnake/"><img style="position: absolute; z-index: 20; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png" alt="Fork me on GitHub"></a>
+    <div class="navbar">
+      <div class="navbar-inner">
+	<a class="brand" href="#">Mediasnake</a>
+	<ul class="nav">
+	  <li class="active"><a href="index.html">Documentation</a></li>
+	  <li><a href="https://github.com/pv/mediasnake/releases/">Downloads</a></li>
+	  <li><a href="https://github.com/pv/mediasnake/">Development</a></li>
+	</ul>
+      </div>
+    </div>
+    <div id="main-container" class="container">
+      <div id="push-top"></div>
+      <div class="main">
+	<div class="row-fluid">
+          <div class="span9">
+	    <div class="row-fluid">
+	      <div class="span12">
+		<div class="navbar">
+		  
+    <ul class="breadcrumb">
+      
+      <li><a href="index.html">Mediasnake 0.1 documentation</a> <span class="divider">/</span> </li>
+       
+      
+      <li class="active">Installation</li>
+      
+    </ul>
+		</div>
+	      </div>
+	    </div>
+	    
+	    <div class="bodywrapper">
+	      <div class="body" id="section-body">
+		
+  <div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>Mediasnake is a Django application written in Python. There are many
+ways to serve it. Here, we describe how to do it on Debian-based Linux
+systems, using NGINX or Apache as the web server.</p>
+<div class="section" id="unpacking">
+<h2>Unpacking<a class="headerlink" href="#unpacking" title="Permalink to this headline">¶</a></h2>
+<p>First, select a location where you want to put the code. It does not
+matter much where it is, but it <strong>must NOT be inside the web root</strong> of
+your web server. Below, we assume you will install the application
+under: <tt class="docutils literal"><span class="pre">/srv/mediasnake</span></tt>.</p>
+<p>Unpack the source package there. Now, under <tt class="docutils literal"><span class="pre">/srv/mediasnake</span></tt> you
+should have:</p>
+<div class="highlight-python"><pre>/srv/mediasnake
+    bootstrap.py
+    config.ini.example
+    data/
+    docs/
+    manage.py
+    mediasnake/
+    mediasnakefiles/
+    ...</pre>
+</div>
+</div>
+<div class="section" id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
+<p>If you are using Apache:</p>
+<div class="highlight-python"><pre>apt-get install python-virtualenv ffmpegthumbnailer libapache2-mod-wsgi</pre>
+</div>
+<p>If you are using NGINX + uWSGI + Supervisord:</p>
+<div class="highlight-python"><pre>apt-get install python-virtualenv ffmpegthumbnailer supervisor uwsgi-plugin-python</pre>
+</div>
+<p>If you want something else, take a look at
+<a class="reference external" href="https://docs.djangoproject.com/en/1.5/howto/deployment/">https://docs.djangoproject.com/en/1.5/howto/deployment/</a></p>
+</div>
+<div class="section" id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
+<p>Go to <tt class="docutils literal"><span class="pre">/srv/mediasnake/</span></tt> and copy <tt class="docutils literal"><span class="pre">config.ini.example</span></tt> to
+<tt class="docutils literal"><span class="pre">config.ini</span></tt>.</p>
+<p>Change the following options:</p>
+<div class="highlight-python"><pre>url_prefix = /mediasnake
+video_dirs = "/home/data/My Videos", "/home/data/More of My Videos"
+hostnames = "localhost", "127.0.0.1", "mysite.com"</pre>
+</div>
+<p>Of course, choose the above two video directories as you like.  The
+<tt class="docutils literal"><span class="pre">url_prefix</span></tt> above is something that needs to match your web server
+configuration, see below.  The <tt class="docutils literal"><span class="pre">hostnames</span></tt> need to match the names
+of your virtual hosts.</p>
+</div>
+<div class="section" id="file-permissions">
+<h2>File permissions<a class="headerlink" href="#file-permissions" title="Permalink to this headline">¶</a></h2>
+<p>Set the file permissions so that the web and app servers can access
+the data files:</p>
+<div class="highlight-python"><pre>mkdir env
+chmod a+rX -R /srv/mediasnake/
+chgrp www-data -R data/ env/
+chmod ug=rwX,o= -R data/ env/</pre>
+</div>
+<p>Moreover, you need to make sure the www-data user or group can
+actually read the video files that you plan to serve.</p>
+</div>
+<div class="section" id="initialization">
+<h2>Initialization<a class="headerlink" href="#initialization" title="Permalink to this headline">¶</a></h2>
+<p>Run:</p>
+<div class="highlight-python"><pre>sudo -u www-data python bootstrap.py</pre>
+</div>
+<p>This will download and install all dependencies into a directory
+<tt class="docutils literal"><span class="pre">env/</span></tt>, and ask you to create a user account and a password.</p>
+<p>The system uses a Sqlite database stored in the <tt class="docutils literal"><span class="pre">data/</span></tt> directory.</p>
+</div>
+<div class="section" id="web-server-configuration-apache">
+<h2>Web server configuration (Apache)<a class="headerlink" href="#web-server-configuration-apache" title="Permalink to this headline">¶</a></h2>
+<p>First enable the Apache WSGI module:</p>
+<div class="highlight-python"><pre>a2enmod wsgi</pre>
+</div>
+<p>Then write an Apache configuration file <tt class="docutils literal"><span class="pre">/etc/apache2/conf.d/mediasnake</span></tt>:</p>
+<div class="highlight-python"><pre>Alias /mediasnake/static /srv/mediasnake/data/static
+
+&lt;Directory /srv/mediasnake/data/static&gt;
+    Order deny,allow
+    Allow from all
+    AllowOverride None
+&lt;/Directory&gt;
+
+WSGIScriptAlias /mediasnake /srv/mediasnake/mediasnake/wsgi.py
+WSGIPythonHome /srv/mediasnake/env
+WSGIPythonPath /srv/mediasnake
+
+&lt;Directory /srv/mediasnake/mediasnake&gt;
+    &lt;Files wsgi.py&gt;
+        Order deny,allow
+        Allow from all
+    &lt;/Files&gt;
+&lt;/Directory&gt;</pre>
+</div>
+<p>You can also find this example file under in the <tt class="docutils literal"><span class="pre">docs/examples/</span></tt>
+directory.</p>
+<p>If you have multiple virtual hosts, you may want to drop the
+configuration into only one of them instead.</p>
+<p>Now, do:</p>
+<div class="highlight-python"><pre>/etc/init.d/apache reload</pre>
+</div>
+<p>This also needs to be done after every time you change <tt class="docutils literal"><span class="pre">config.ini</span></tt>.</p>
+<p>You should be able to browse to <a class="reference external" href="http://yoursite/mediasnake/">http://yoursite/mediasnake/</a> There, log
+in, and go to the admin tab. Press &#8220;Rescan for Videos&#8221; and wait &#8212;
+this may take some time as it generates all video thumbnails at once.
+After that, you should be all set!</p>
+</div>
+<div class="section" id="web-server-configuration-nginx">
+<h2>Web server configuration (NGINX)<a class="headerlink" href="#web-server-configuration-nginx" title="Permalink to this headline">¶</a></h2>
+<p>This assumes you understand how NGINX configuration in general works.</p>
+<p>A suitable NGINX + uWSGI configuration for Mediasnake looks like
+this:</p>
+<div class="highlight-python"><pre>location /mediasnake/static/ {
+    try_files $uri $uri/ =404;
+    alias /srv/mediasnake/data/static/;
+}
+
+location /mediasnake/streaming/ {
+    internal;
+    alias /srv/mediasnake/data/streaming/;
+}
+
+location /mediasnake/ {
+    include /etc/nginx/uwsgi_params;
+    uwsgi_param SCRIPT_NAME /mediasnake;
+    uwsgi_modifier1 30;
+    uwsgi_pass unix:/srv/mediasnake/data/uwsgi.sock;
+}</pre>
+</div>
+<p>You can now set <tt class="docutils literal"><span class="pre">file_serving</span> <span class="pre">=</span> <span class="pre">nginx</span></tt> in <tt class="docutils literal"><span class="pre">config.ini</span></tt> to hand off
+file streaming to NGINX. Finally, do:</p>
+<div class="highlight-python"><pre>/etc/init.d/nginx reload</pre>
+</div>
+<p>As you know, NGINX expects app servers to run as separate
+processes. This is conveniently done by using e.g. <tt class="docutils literal"><span class="pre">supervisord</span></tt>. We
+only need to create a configuration file
+<tt class="docutils literal"><span class="pre">/etc/supervisor/conf.d/mediasnake.conf</span></tt>:</p>
+<div class="highlight-python"><pre>[program:mediasnake]
+command = uwsgi_python -H env --socket data/uwsgi.sock --mount=/mediasnake=mediasnake/wsgi.py -M -p 4
+directory = /srv/mediasnake
+user = www-data</pre>
+</div>
+<p>This spawns 4 worker processes.</p>
+<p>Now do:</p>
+<div class="highlight-python"><pre>/etc/init.d/supervisor stop
+/etc/init.d/supervisor start
+supervisorctl</pre>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">supervisorctl</span></tt> should indicate the process is now running. The
+site should now be ready to go.</p>
+</div>
+<div class="section" id="streaming-on-http-serving-on-https">
+<h2>Streaming on HTTP, serving on HTTPS<a class="headerlink" href="#streaming-on-http-serving-on-https" title="Permalink to this headline">¶</a></h2>
+<p>It turns out that SSL, self-signed certificates in particular, cause
+major pain for would-be player applications. It then makes sense to
+stream the video content over plain HTTP.</p>
+<p>The security implications of this are not extremely bad:</p>
+<ul class="simple">
+<li>Authentication information is not sent over HTTP.</li>
+<li>The streaming URL is locked to a single IP address.</li>
+<li>It is only valid for a couple of hours.</li>
+<li>The URL address does not contain information about the file name.</li>
+<li>It is not possible to browse the collection via HTTP.</li>
+</ul>
+<p>A man-in-the-middle party snooping on you (e.g., someone on your local
+network, or your ISP or government) will mostly find out that you
+watched some video. Unless they act fast or record ALL network traffic,
+they don&#8217;t get much wiser than that.</p>
+<p>It is now assumed that you have followed the above instructions, and
+configured the service to go through a SSL enabled virtual host.</p>
+<p>We also assume that you have a second virtual host for serving HTTP.
+If not, you need to add it.</p>
+<p>The configuration for this case is as follows: first change in your
+<tt class="docutils literal"><span class="pre">config.ini</span></tt>:</p>
+<div class="highlight-python"><pre>http_streaming_address = http://mysite.com:80/</pre>
+</div>
+<p>where the site and the port number correspond to your HTTP virtual
+host.</p>
+<p>You should now configure Mediasnake on the HTTP virtual host. The
+configuration goes exactly the same as on the other virtual host.</p>
+<p>When <tt class="docutils literal"><span class="pre">http_streaming_address</span></tt> is set in the configuration file,
+Mediasnake will only serve streaming tickets if it notices the virtual
+host doesn&#8217;t have SSL. Moreover, the authentication cookies are set
+SSL-only, so they are not transmitted unencrypted.</p>
+<p>However, if you had an active logged-in session going, you should log
+out, so that the cookie gets its correct SSL-only status!</p>
+</div>
+<div class="section" id="troubleshooting">
+<h2>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permalink to this headline">¶</a></h2>
+<p>If you encounter 500 Internal Server errors, try setting <tt class="docutils literal"><span class="pre">debug=1</span></tt>
+in <tt class="docutils literal"><span class="pre">config.ini</span></tt> and looking into Apache logs and into
+<tt class="docutils literal"><span class="pre">data/mediasnake.log</span></tt>.</p>
+</div>
+<div class="section" id="development">
+<h2>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h2>
+<p>If you want to hack on it, just run:</p>
+<div class="highlight-python"><pre>. env/bin/activate
+./manage.py runserver</pre>
+</div>
+<p>Then go read Django documentation from <a class="reference external" href="http://djangoproject.com/">http://djangoproject.com/</a> if
+you haven&#8217;t already and hack away.</p>
+</div>
+</div>
+
+
+	      </div>
+	    </div>
+          </div>
+          
+      <div class="rightsidebar span3">
+        <div class="sphinxsidebarwrapper"><h3>Contents</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#unpacking">Unpacking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#file-permissions">File permissions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#initialization">Initialization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#web-server-configuration-apache">Web server configuration (Apache)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#web-server-configuration-nginx">Web server configuration (NGINX)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#streaming-on-http-serving-on-https">Streaming on HTTP, serving on HTTPS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#development">Development</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+</ul>
+
+        </div>
+      </div>
+        </div>
+      </div>
+      <div id="push-bottom"></div>
+    </div>
+  </body>
+</html>
