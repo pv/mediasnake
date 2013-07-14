@@ -18,9 +18,11 @@
 	<li class="media">
 	  <a class="pull-left" href="#">
             {# The image is loaded by Javascript (see below) when the accordion is expanded. #}
-	    <img width=190 class="media-object not-loaded"
-                 src="{{ STATIC_URL }}mediasnake/img/grey.gif"
-                 data-src="{% url 'thumbnail' video_file.id %}">
+            <div style="overflow: hidden; width: 190px; height: 110px;">
+	      <img width=190 class="media-object not-loaded"
+                   src="{{ STATIC_URL }}mediasnake/img/grey.gif"
+                   data-src="{% url 'thumbnail' video_file.id %}">
+	    </div>
 	  </a>
 	  <div class="media-body">
 	    <h4>{{ video_file.title }}</h4>
