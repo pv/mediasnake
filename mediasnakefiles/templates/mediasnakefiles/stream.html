@@ -12,9 +12,7 @@
 <p>
   <video width="640" controls>
     <source src="{{ ticket.url }}" type="{{ video_file.mimetype }}">
-    <object data="{{ ticket.url }}" type="{{ video_file.mimetype }}" width="640">
-      <embed src="{{ ticket.url }}" width="640">
-    </object>
+    <p>This video format is unfortunately not supported by your browser. You need to use the direct link instead. Sorry!</p>
   </video>
 </p>
 {% endblock %}
