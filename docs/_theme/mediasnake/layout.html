@@ -1,0 +1,217 @@
+{#
+    layout.html
+    ~~~~~~~~~~~
+
+    Master layout template for Sphinx themes.
+
+    :copyright: Copyright 2007-2011 by the Sphinx team, see AUTHORS.
+                Copyright 2013 by Pauli Virtanen.
+    :license: BSD, see LICENSE for details.
+#}
+<!DOCTYPE html>
+<html lang="en">
+
+{%- set url_root = pathto('', 1) %}
+{%- if url_root == '#' %}{% set url_root = '' %}{% endif %}
+{%- if not embedded and docstitle %}
+  {%- set titlesuffix = " &mdash; "|safe + docstitle|e %}
+{%- else %}
+  {%- set titlesuffix = "" %}
+{%- endif %}
+
+{%- macro relbar_top() %}
+    <ul class="breadcrumb">
+      {%- block rootrellink %}
+      {% if pagename != master_doc %}
+      <li><a href="{{ pathto(master_doc) }}">{{ shorttitle|e }}</a> <span class="divider">/</span> </li>
+      {% endif %}
+      {%- endblock %}
+      {%- for parent in parents %}
+      <li class="active"><a href="{{ parent.link|e }}" {% if loop.last %}{{ accesskey("U") }}{% endif %}>{{ parent.title }}</a></li>
+      {%- endfor %}
+      {%- block relbaritems %} {% endblock %}
+      {% if pagename != master_doc %}
+      <li class="active">{{ title|e }}</li>
+      {% else %}
+      <li class="active">{{ shorttitle|e }}</li>
+      {% endif %}
+    </ul>
+{%- endmacro %}
+
+{%- macro sidebar() %}
+      <div class="rightsidebar span3">
+        <div class="sphinxsidebarwrapper">
+          {%- block sidebarlogo %}
+          {%- if logo %}
+            <p class="logo"><a href="{{ pathto(master_doc) }}">
+              <img class="logo" src="{{ pathto('_static/' + logo, 1) }}" alt="Logo">
+            </a></p>
+          {%- endif %}
+          {%- endblock %}
+          {%- if sidebars != None %}
+            {#- new style sidebar: explicitly include/exclude templates #}
+            {%- for sidebartemplate in sidebars %}
+            {%- include sidebartemplate %}
+            {%- endfor %}
+          {%- else %}
+            {#- old style sidebars: using blocks -- should be deprecated #}
+            {%- block sidebartoc %}
+            {%- include "localtoc.html" %}
+            {%- endblock %}
+            {%- block sidebarrel %}
+            {%- include "relations.html" %}
+            {%- endblock %}
+            {%- block sidebarsourcelink %}
+            {%- include "sourcelink.html" %}
+            {%- endblock %}
+            {%- if customsidebar %}
+            {%- include customsidebar %}
+            {%- endif %}
+            {%- block sidebarsearch %}
+            {%- include "searchbox.html" %}
+            {%- endblock %}
+          {%- endif %}
+        </div>
+      </div>
+{%- endmacro %}
+
+{%- macro script() %}
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '{{ url_root }}',
+        VERSION:     '{{ release|e }}',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '{{ '' if no_search_suffix else file_suffix }}',
+        HAS_SOURCE:  {{ has_source|lower }}
+      };
+    </script>
+    <script type="text/javascript" src="{{ pathto('_static/jquery/js/jquery.min.js', 1) }}?version=2.0.3"></script>
+    <script type="text/javascript" src="{{ pathto('_static/bootstrap/js/bootstrap.min.js', 1) }}?version=2.3.2"></script>
+    {%- for scriptfile in script_files %}
+    <script type="text/javascript" src="{{ pathto(scriptfile, 1) }}"></script>
+    {%- endfor %}
+{%- endmacro %}
+
+{%- macro css() %}
+    <link type="text/css" href="{{ pathto('_static/bootstrap/css/bootstrap.min.css', 1) }}?version=2.3.2" rel="stylesheet">
+    <link type="text/css" href="{{ pathto('_static/bootstrap/css/bootstrap-responsive.min.css', 1) }}?version=2.3.2" rel="stylesheet">
+    <link type="text/css" href="{{ pathto('_static/mediasnake/css/base.css', 1) }}" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ pathto('_static/' + style, 1) }}" type="text/css" >
+    <link rel="stylesheet" href="{{ pathto('_static/pygments.css', 1) }}" type="text/css" >
+    {%- for cssfile in css_files %}
+    <link rel="stylesheet" href="{{ pathto(cssfile, 1) }}" type="text/css" >
+    {%- endfor %}
+{%- endmacro -%}
+
+  <head>
+    <meta charset="{{ encoding }}">
+    {{ metatags }}
+    {%- block htmltitle %}
+    <title>{{ title|striptags|e }}{{ titlesuffix }}</title>
+    {%- endblock %}
+    {{ css() }}
+    {%- if not embedded %}
+    {{ script() }}
+    {%- if use_opensearch %}
+    <link rel="search" type="application/opensearchdescription+xml"
+          title="{% trans docstitle=docstitle|e %}Search within {{ docstitle }}{% endtrans %}"
+          href="{{ pathto('_static/opensearch.xml', 1) }}">
+    {%- endif %}
+    {%- if favicon %}
+    <link rel="shortcut icon" href="{{ pathto('_static/' + favicon, 1) }}">
+    {%- endif %}
+    {%- endif %}
+
+    {%- block linktags %}
+    {%- if hasdoc('about') %}
+    <link rel="author" title="{{ _('About these documents') }}" href="{{ pathto('about') }}" >
+    {%- endif %}
+    {%- if hasdoc('genindex') %}
+    <link rel="index" title="{{ _('Index') }}" href="{{ pathto('genindex') }}" >
+    {%- endif %}
+    {%- if hasdoc('search') %}
+    <link rel="search" title="{{ _('Search') }}" href="{{ pathto('search') }}" >
+    {%- endif %}
+    {%- if hasdoc('copyright') %}
+    <link rel="copyright" title="{{ _('Copyright') }}" href="{{ pathto('copyright') }}" >
+    {%- endif %}
+    <link rel="top" title="{{ docstitle|e }}" href="{{ pathto('index') }}" >
+    {%- if parents %}
+    <link rel="up" title="{{ parents[-1].title|striptags|e }}" href="{{ parents[-1].link|e }}" >
+    {%- endif %}
+    {%- if next %}
+    <link rel="next" title="{{ next.title|striptags|e }}" href="{{ next.link|e }}" >
+    {%- endif %}
+    {%- if prev %}
+    <link rel="prev" title="{{ prev.title|striptags|e }}" href="{{ prev.link|e }}" >
+    {%- endif %}
+    {%- endblock %}
+
+    {%- block extrahead %} {% endblock %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}">
+    <div id="body-wrapper">
+    <div class="navbar">
+      <div class="navbar-inner">
+	<a class="brand" href="#">Mediasnake</a>
+	<ul class="nav">
+	  <li class="active"><a href="{{ pathto('index') }}">Documentation</a></li>
+	  <li><a href="https://github.com/pv/mediasnake/releases/">Downloads</a></li>
+	  <li><a href="https://github.com/pv/mediasnake/">Development</a></li>
+	</ul>
+      </div>
+    </div>
+    {%- block content %}
+    <div class="container">
+      <div class="main">
+	<div class="row-fluid">
+          <div class="span9">
+	    {%- block navbar %}
+            <div class="row-fluid">
+	      <div class="span12">
+		<div class="navbar">
+		  {{ relbar_top() }}
+		</div>
+	      </div>
+	    </div>
+	    {% endblock %}
+	    {%- block document %}
+            <div class="bodywrapper">
+              <div class="body" id="section-body">
+		{% block body %} {% endblock %}
+              </div>
+            </div>
+	    {%- endblock %}
+          </div>
+          {{ sidebar() }}
+        </div>
+      </div>
+    </div>
+    {%- endblock %}
+    <div id="push"></div>
+    </div>
+
+    {%- block footer %}
+    <footer class="footer">
+      <div class="container">
+	{%- if show_copyright %}
+	<span>
+	  {%- if hasdoc('copyright') %}
+          {% trans path=pathto('copyright'), copyright=copyright|e %}&copy; <a href="{{ path }}">Copyright</a> {{ copyright }}.{% endtrans %}
+	  {%- else %}
+          {% trans copyright=copyright|e %}&copy; Copyright {{ copyright }}.{% endtrans %}
+	  {%- endif %}
+	</span>
+	{%- endif %}
+	{%- if last_updated %}
+	<span>
+	  {% trans last_updated=last_updated|e %}Last updated on {{ last_updated }}.{% endtrans %}
+	</span>
+	{%- endif %}
+      </p>
+    </footer>
+    {%- endblock %}
+  </body>
+</html>
