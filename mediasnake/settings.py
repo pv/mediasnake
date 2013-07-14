@@ -164,8 +164,10 @@ LOGGING = {
     }
 }
 
-MEDIASNAKEFILES_MIMETYPES = (
-    "video/*",
+MEDIASNAKEFILES_ACCEPTED_FILE_TYPES = (
+    ("*", "video/*", None),
+    ("*.ogm", "application/ogg", "video/ogg"),
+    ("*.ogv", "application/ogg", "video/ogg"),
 )
 MEDIASNAKEFILES_TICKET_LIFETIME_HOURS = 3
 MEDIASNAKEFILES_FFMPEGTHUMBNAILER = "ffmpegthumbnailer"

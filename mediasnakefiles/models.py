@@ -204,13 +204,18 @@ def scan():
                         set_scan_status(msg)
 
                         # Insert new files
-                        for file in files:
-                            filename = os.path.normpath(os.path.join(root, path, file))
+                        for basename in files:
+                            filename = os.path.normpath(os.path.join(root, path, basename))
                             mimetype = get_mime_type(filename)
 
-                            # Check that the mime type is a video type
-                            for pattern in settings.MEDIASNAKEFILES_MIMETYPES:
-                                if fnmatch.fnmatch(mimetype, pattern):
+                            # Check that the extension and mime type
+                            # are indicative of a video file
+                            for file_pattern, mime_pattern, replacement_mimetype in \
+                                    settings.MEDIASNAKEFILES_ACCEPTED_FILE_TYPES:
+                                if (fnmatch.fnmatch(mimetype, mime_pattern) and
+                                    fnmatch.fnmatch(basename, file_pattern)):
+                                    if replacement_mimetype is not None:
+                                        mimetype = replacement_mimetype
                                     break
                             else:
                                 continue
