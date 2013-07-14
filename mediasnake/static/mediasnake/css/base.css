@@ -1,0 +1,36 @@
+html, body {
+    height: 100%;
+}
+
+body {
+    background-color: #11000a;
+}
+
+#push-top {
+    height: 82px;
+}
+
+.navbar {
+    position: relative;
+    z-index: 10;
+    margin-bottom: 0;
+}
+
+.navbar-inner {
+    border-radius: 0;
+}
+
+#main-container {
+    min-height: 100%;
+    height: auto;
+
+    margin-top: -82px;
+
+    padding-top: 20px;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-bottom: 20px;
+    background-color: #ffffff;
+    border-left: 1px solid #aaaaaa;
+    border-right: 1px solid #aaaaaa;
+}
