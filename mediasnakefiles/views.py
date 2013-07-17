@@ -12,7 +12,8 @@ from django.contrib.auth.decorators import login_required
 
 from mediasnake_sendfile import sendfile
 
-from mediasnakefiles.models import VideoFile, StreamingTicket, scan, get_scan_status, spawn_rescan
+from mediasnakefiles.models import VideoFile, StreamingTicket, get_scan_status, spawn_rescan, \
+     get_thumbnail_filename
 
 
 def _sort_key(video_file):
@@ -23,46 +24,71 @@ def _sort_key(video_file):
     return (dirname.split(os.path.sep), numbers, title, basename)
 
 
-class _VideoGroup(object):
-    def __init__(self, name, video_files):
-        self.video_files = video_files
+class Folder(object):
+    def __init__(self, name, groups):
+        self.groups = groups
         self.name = name
+
+
+class VideoGroup(object):
+    def __init__(self, base_file, video_files):
+        self.video_files = video_files
+        self.base_file = base_file
 
 
 @login_required
 @cache_page(30*24*60*60)
-@cache_control(must_revalidate=True, max_age=30*24*60*60)
 def index(request):
+    # Note: the cache will be invalidated by rescanning, so we can use
+    # a long caching time
+
     video_files = VideoFile.objects.all()
-    video_groups = []
+    folders = []
 
     if video_files:
+        folder = None
         group = None
+        last_base = None
         for video_file in sorted(video_files, key=_sort_key):
-            if group is None or video_file.relative_dirname != group.name:
-                group = _VideoGroup(video_file.relative_dirname, [])
-                video_groups.append(group)
+            if folder is None or video_file.relative_dirname != folder.name:
+                folder = Folder(video_file.relative_dirname, [])
+                last_base = None
+                folders.append(folder)
+
+            base, ext = os.path.splitext(
+                os.path.join(video_file.relative_dirname, video_file.basename))
+
+            if group is None or base != last_base:
+                group = VideoGroup(video_file, [])
+                last_base = base
+                folder.groups.append(group)
+
             group.video_files.append(video_file)
 
-    context = {'video_groups': video_groups}
+    context = {'folders': folders}
     return render(request, "mediasnakefiles/index.html", context)
 
 
 @login_required
 @cache_page(30*24*60*60)
-@cache_control(must_revalidate=True, max_age=30*24*60*60)
-def thumbnail(request, id):
-    try:
-        video_file = VideoFile.objects.get(pk=id)
-    except VideoFile.DoesNotExist:
-        raise Http404
+@cache_control(private=True, max_age=30*24*60*60)
+def thumbnail(request, thumbnail):
+    # The thumbnail id is a hash formed from file contents, so it is
+    # essentially 1-to-1 with the thumbnail, which allows us to use
+    # long caching times.
 
-    fn = video_file.thumbnail_filename
+    fn = get_thumbnail_filename(thumbnail)
 
     if not os.path.isfile(fn):
         raise Http404
 
     return sendfile(request, fn, mimetype="image/jpeg")
+
+
+class StreamEntry(object):
+    def __init__(self, video_file, ticket):
+        self.video_file = video_file
+        self.ticket = ticket
 
 
 @login_required
@@ -72,15 +98,19 @@ def stream(request, id):
     except VideoFile.DoesNotExist:
         raise Http404
 
-    ticket = StreamingTicket.new_for_video(video_file,
-                                           request.META['REMOTE_ADDR'])
-    ticket.save()
+    base, ext = os.path.splitext(video_file.filename)
+
+    videos = video_file.get_all_versions()
+    entries = [StreamEntry(x, StreamingTicket.new_for_video(x, request.META['REMOTE_ADDR']))
+               for x in videos]
+    for entry in entries:
+        entry.ticket.save()
 
     # Do some housekeeping at the same time
     StreamingTicket.cleanup()
 
-    context = {'video_file': video_file,
-               'ticket': ticket}
+    context = {'title': videos[0].title,
+               'entries': entries}
 
     return render(request, "mediasnakefiles/stream.html", context)
 

@@ -39,6 +39,10 @@ class VideoFile(models.Model):
         return os.path.basename(self.filename)
 
     @property
+    def extension(self):
+        return os.path.splitext(self.filename)[1].lstrip('.')
+
+    @property
     def relative_dirname(self):
         for dn in settings.MEDIASNAKEFILES_DIRS:
             dn = os.path.normpath(dn)
@@ -109,6 +113,12 @@ class VideoFile(models.Model):
             os.unlink(tmpfn)
 
         return True
+
+    def get_all_versions(self):
+        base, ext = os.path.splitext(self.basename)
+        rel_base = os.path.sep + os.path.join(self.relative_dirname, base + '.')
+        return [x for x in VideoFile.objects.filter(filename__contains=rel_base)
+                if x.relative_dirname == self.relative_dirname and x.basename.startswith(base + '.')]
 
     def __str__(self):
         return "VideoFile: '%s/%s'" % (self.relative_dirname, self.basename)

@@ -4,30 +4,32 @@
 
 {% block content %}
 <div class="accordion" id="video-list">
-  {% for video_group in video_groups %}
+  {% for folder in folders %}
   <div class="accordion-group">
     <div class="accordion-heading">
       <a class="accordion-toggle" 
          data-toggle="collapse" data-parent="video-list" 
-         href="#video-group-{{ forloop.counter }}">{{ video_group.name }}</a>
+         href="#video-group-{{ forloop.counter }}">{{ folder.name }}</a>
     </div>
     <div id="video-group-{{ forloop.counter }}" class="accordion-body collapse">
       <div class="accordion-inner">
 	<ul class="media-list">
-	{% for video_file in video_group.video_files %}
+	{% for video_group in folder.groups %}
 	<li class="media">
-	  <a class="pull-left" href="{% url 'stream' video_file.id %}">
+	  <a class="pull-left" href="{% url 'stream' video_group.base_file.id %}">
             {# The image is loaded by Javascript (see below) when the accordion is expanded. #}
             <div style="overflow: hidden; width: 190px; height: 110px;">
 	      <img width=190 class="media-object not-loaded"
                    src="{{ STATIC_URL }}mediasnake/img/grey.gif"
-                   data-src="{% url 'thumbnail' video_file.id %}">
+                   data-src="{% url 'thumbnail' video_group.base_file.thumbnail %}">
 	    </div>
 	  </a>
 	  <div class="media-body">
-	    <h4>{{ video_file.title }}</h4>
+	    <h4>{{ video_group.base_file.title }}</h4>
+	    {% for video_file in video_group.video_files %}
 	    <div style="color: #aaaaaa; font-size: 75%;">{{ video_file.relative_dirname }} / {{ video_file.basename }}</div>
-	    <a style="margin-top: 1em;" href="{% url 'stream' video_file.id %}" class="btn btn-inverse">Stream</a>
+	    {% endfor %}
+	    <a style="margin-top: 1em;" href="{% url 'stream' video_group.base_file.id %}" class="btn btn-inverse">Stream</a>
 	  </div>
 	  {% endfor %}
 	</li>
