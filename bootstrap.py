@@ -6,7 +6,7 @@ import random
 
 def main():
     set_secret_key()
-    run(['virtualenv', 'env'])
+    run(['virtualenv', '--system-site-packages', 'env'])
     print("\n\n" + "-"*79)
     print("Downloading and installing requirements")
     print("\n\n")
