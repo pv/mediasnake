@@ -42,7 +42,7 @@ class VideoFile(models.Model):
     def relative_dirname(self):
         for dn in settings.MEDIASNAKEFILES_DIRS:
             dn = os.path.normpath(dn)
-            if self.filename.startswith(dn):
+            if self.filename.startswith(dn + os.path.sep):
                 root = dn
                 break
         else:
