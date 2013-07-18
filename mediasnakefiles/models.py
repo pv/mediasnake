@@ -201,7 +201,16 @@ def scan():
     """
     Scan the video directories for files.
     """
+    try:
+        return _scan()
+    except:
+        import traceback
+        msg = traceback.format_exc()
+        logger.error(msg)
+        set_scan_status(None)
+        raise
 
+def _scan():
     try:
         with LockFile(SCAN_LOCKFILE, fail_if_active=True):
             with transaction.commit_on_success():
