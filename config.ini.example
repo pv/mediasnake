@@ -105,6 +105,9 @@ http_streaming_address =
 #
 # db_type
 #     One of: sqlite3, postgresql, mysql, oracle
+#     
+#     If using mysql, be sure to create the database with utf8 encoding:
+#     CREATE DATABASE mediasnake CHARSET utf8 COLLATE utf8_unicode_ci;
 # db_host
 #     Database server host name. (Not used for sqlite3.)
 # db_port
