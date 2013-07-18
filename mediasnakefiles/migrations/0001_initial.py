@@ -11,7 +11,7 @@ class Migration(SchemaMigration):
         # Adding model 'VideoFile'
         db.create_table(u'mediasnakefiles_videofile', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('filename', self.gf('django.db.models.fields.CharField')(unique=True, max_length=16384)),
+            ('filename', self.gf('django.db.models.fields.TextField')()),
             ('mimetype', self.gf('django.db.models.fields.CharField')(max_length=256)),
             ('thumbnail', self.gf('django.db.models.fields.CharField')(max_length=256)),
         ))
@@ -47,7 +47,7 @@ class Migration(SchemaMigration):
         },
         u'mediasnakefiles.videofile': {
             'Meta': {'object_name': 'VideoFile'},
-            'filename': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '16384'}),
+            'filename': ('django.db.models.fields.TextField', [], {}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'mimetype': ('django.db.models.fields.CharField', [], {'max_length': '256'}),
             'thumbnail': ('django.db.models.fields.CharField', [], {'max_length': '256'})

@@ -29,7 +29,7 @@ SCAN_STATUS = os.path.join(settings.DATA_DIR, 'rescan.txt')
 
 
 class VideoFile(models.Model):
-    filename = models.CharField(max_length=16384, unique=True)
+    filename = models.TextField()
 
     mimetype = models.CharField(max_length=256)
     thumbnail = models.CharField(max_length=256)
