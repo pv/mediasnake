@@ -70,7 +70,6 @@ def index(request):
 
 
 @login_required
-@cache_page(30*24*60*60)
 @cache_control(private=True, max_age=30*24*60*60)
 def thumbnail(request, thumbnail):
     # The thumbnail id is a hash formed from file contents, so it is
