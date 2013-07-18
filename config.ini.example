@@ -98,3 +98,27 @@ file_serving = default
 # http_streaming_address = http://mysite.com:1234/
 #
 http_streaming_address =
+
+
+# Database settings
+# -----------------
+#
+# db_type
+#     One of: sqlite3, postgresql, mysql, oracle
+# db_host
+#     Database server host name. (Not used for sqlite3.)
+# db_port
+#     Database server port. (Not used for sqlite3.)
+# db_name
+#     Database name. (Not used for sqlite3.)
+# db_user
+#     Database user name. (Not used for sqlite3.)
+# db_password
+#     Database user password. (Not used for sqlite3.)
+#
+db_type = sqlite3
+db_host =
+db_port =
+db_name =
+db_user =
+db_password =

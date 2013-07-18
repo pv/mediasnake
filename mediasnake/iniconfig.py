@@ -16,6 +16,12 @@ video_dirs = list()
 secret_key = string()
 debug = boolean()
 http_streaming_address = string()
+db_type = option(postgresql, mysql, sqlite3, oracle)
+db_host = string()
+db_port = string()
+db_name = string()
+db_user = string()
+db_password = string()
 """
 
 CONFIG_FILE = os.path.normpath(

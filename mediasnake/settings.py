@@ -50,6 +50,18 @@ DATABASES = {
     }
 }
 
+if ini['db_type'] == 'sqlite3':
+    pass
+elif ini['db_type'] in ('postgresql', 'mysql', 'oracle'):
+    DATABASES['default']['ENGINE'] = 'django.db.backends.' + ini['db_type']
+    DATABASES['default']['NAME'] = ini['db_name']
+    DATABASES['default']['USER'] = ini['db_user']
+    DATABASES['default']['PASSWORD'] = ini['db_password']
+    DATABASES['default']['HOST'] = ini['db_host']
+    DATABASES['default']['PORT'] = ini['db_port']
+else:
+    raise RuntimeError("Unknown db_type %r" % ini['db_type'])
+
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
