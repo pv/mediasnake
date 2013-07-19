@@ -80,14 +80,16 @@ actually read the video files that you plan to serve.
 Initialization
 ==============
 
-Run::
+By default, the system uses a Sqlite database stored in the ``data/``
+directory, but editing ``config.ini`` you can tell it to use also other DB
+systems.
+
+To initialize, run::
 
     sudo -u www-data python bootstrap.py
 
 This will download and install all dependencies into a directory
 ``env/``, and ask you to create a user account and a password.
-
-The system uses a Sqlite database stored in the ``data/`` directory.
 
 
 Web server configuration (Apache)
