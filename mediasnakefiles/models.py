@@ -172,7 +172,7 @@ class StreamingTicket(models.Model):
 
     @classmethod
     def cleanup(cls):
-        cls.objects.filter(timestamp__lt=StreamingTicket._threshold())
+        cls.objects.filter(timestamp__lt=StreamingTicket._threshold()).delete()
         
 
 @receiver(post_delete, sender=VideoFile)
@@ -192,7 +192,7 @@ def _streaming_ticket_cleanup_symlink(sender, instance, using, **kwargs):
     """
     Remove thumbnails when the video is removed from the database.
     """
-    fn = os.path.join(settings.MEDIASNAKEFILES_STREAM_ROOT, instance.secret)
+    fn = os.path.join(settings.SENDFILE_ROOT, instance.secret)
     if os.path.islink(fn):
         os.unlink(fn)
 
