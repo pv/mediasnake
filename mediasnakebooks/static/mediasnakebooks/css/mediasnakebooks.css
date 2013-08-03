@@ -8,30 +8,6 @@ div.ebook-text {
     margin-bottom: 30px;
 }
 
-#ebook-text span.known-5 {
-    background-color: #ddddff;
-}
-
-#ebook-text span.known-4 {
-    background-color: #ffdddd;
-}
-
-#ebook-text span.known-3 {
-    background-color: #ddffdd;
-}
-
-#ebook-text span.known-2 {
-    background-color: #ffffdd;
-}
-
-#ebook-text span.known-1 {
-    background-color: #ffddff;
-}
-
-#ebook-text span.known-0 {
-    background-color: #ffffff;
-}
-
 div.controls {
     line-height: 30px;
 }
@@ -50,4 +26,52 @@ div.controls a.pull-right {
 
 #modal-word div.controls {
     margin: 5px;
+}
+
+#modal-word .btn-known-5 {
+    background-image: linear-gradient(to bottom, rgb(208, 204, 251), rgb(230, 230, 230));
+}
+
+#modal-word .btn-known-4 {
+    background-image: linear-gradient(to bottom, rgb(251, 203, 240), rgb(230, 230, 230));
+}
+
+#modal-word .btn-known-3 {
+    background-image: linear-gradient(to bottom, rgb(251, 203, 210), rgb(230, 230, 230));
+}
+
+#modal-word .btn-known-2 {
+    background-image: linear-gradient(to bottom, rgb(251, 233, 203), rgb(230, 230, 230));
+}
+
+#modal-word .btn-known-1 {
+    background-image: linear-gradient(to bottom, rgb(207, 251, 203), rgb(230, 230, 230));
+}
+
+#modal-word .btn-known-0 {
+    background-image: linear-gradient(to bottom, rgb(255, 255, 255), rgb(230, 230, 230));
+}
+
+#ebook-text span.known-5 {
+    background-color: rgb(208, 204, 251);
+}
+
+#ebook-text span.known-4 {
+    background-color: rgb(251, 203, 240);
+}
+
+#ebook-text span.known-3 {
+    background-color: rgb(251, 203, 210);
+}
+
+#ebook-text span.known-2 {
+    background-color: rgb(251, 233, 203);
+}
+
+#ebook-text span.known-1 {
+    background-color: rgb(207, 251, 203);
+}
+
+#ebook-text span.known-0 {
+    background-color: rgb(255, 255, 255);
 }

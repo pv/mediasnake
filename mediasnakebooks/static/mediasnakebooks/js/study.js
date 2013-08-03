@@ -31,8 +31,7 @@ var study = (function() {
     };
 
     var dictLookup = function(word, callback) {
-	$.get(dict_url.replace('@WORD@', word).replace('@word@', word), 
-	      callback);
+	$.get(dict_url.replace('@WORD@', word), callback);
     }
 
     var updateWordKnowledge = function() {
@@ -52,26 +51,39 @@ var study = (function() {
 		return;
 	    }
 
-	    dictLookup(word, function(data) {
-		if (!data['error']) {
-		    popupWordModal(word, data['text']);
-		}
-	    });		       
+	    popupWordModal(word);
 	});
     };
 
-    var popupWordModal = function(word, dictentry) {
+    var popupWordModal = function(word) {
 	$("#modal-word-header").text(word);
 	html = "<div class=\"controls\">";
-	html = html + "<a class=\"btn\" onclick=\"study.adjust('" + escape(word) + "', 5);\">[Unk]</a> ";
-	html = html + "<a class=\"btn\" onclick=\"study.adjust('" + escape(word) + "', 4);\">[4]</a> ";
-	html = html + "<a class=\"btn\" onclick=\"study.adjust('" + escape(word) + "', 3);\">[3]</a> ";
-	html = html + "<a class=\"btn\" onclick=\"study.adjust('" + escape(word) + "', 2);\">[2]</a> ";
-	html = html + "<a class=\"btn\" onclick=\"study.adjust('" + escape(word) + "', 1);\">[1]</a> ";
-	html = html + "<a class=\"btn\" onclick=\"study.adjust('" + escape(word) + "', 0);\">[Ign]</a> ";
+	html = html + "<a class=\"btn btn-known-5\" onclick=\"study.adjust('" + escape(word) + "', 5);\">[Unk]</a> ";
+	html = html + "<a class=\"btn btn-known-4\" onclick=\"study.adjust('" + escape(word) + "', 4);\">[4]</a> ";
+	html = html + "<a class=\"btn btn-known-3\" onclick=\"study.adjust('" + escape(word) + "', 3);\">[3]</a> ";
+	html = html + "<a class=\"btn btn-known-2\" onclick=\"study.adjust('" + escape(word) + "', 2);\">[2]</a> ";
+	html = html + "<a class=\"btn btn-known-1\" onclick=\"study.adjust('" + escape(word) + "', 1);\">[1]</a> ";
+	html = html + "<a class=\"btn btn-known-0\" onclick=\"study.adjust('" + escape(word) + "', 0);\">[Ign]</a> ";
 	html = html + "</div>";
-	html = html + '<pre>' + dictentry + '</pre>';
+
+	if (external_dict_url) {
+	    var url;
+	    url = external_dict_url.replace('@WORD@', word).replace('@word@', word);
+	    html = html + "<div><a class=\"btn btn-link pull-right\" target=\"_blank\" href=\"" + url + "\">External dictionary</a><div>";
+	}
+
+	html = html + "<pre id=\"modal-word-dictionary\"></pre>";
 	$("#modal-word-body").html(html);
+
+	dictLookup(word, function(data) {
+	    if (!data['error']) {
+		$("#modal-word-dictionary").text(data["text"]);
+	    }
+	    else {
+		$("#modal-word-dictionary").text("Dictionary lookup failed: " + data["text"]);
+	    }
+	});
+
 	$("#modal-word").modal();
     }
 
