@@ -4,11 +4,11 @@ from django.utils.html import escape
 import _mecab
 
 INTRA_PUNCTUATION = u"'"
-PUNCTUATION = u"。!?.,;'"
+PUNCTUATION = u"。!?.,;'、「」？―…｜《》〈"
 
 def _token_to_src(token):
     if token in PUNCTUATION:
-        token = '.'
+        token = u""
     return escape(token)
 
 
@@ -19,7 +19,7 @@ def _pad(x):
         return u" " + x
 
 
-def _tokenize_other(paragraphs):
+def _tokenize_eng(paragraphs):
     html = []
     words = set()
 
@@ -32,7 +32,7 @@ def _tokenize_other(paragraphs):
 
         words.update(x for x in bases if x)
         p = ["<span data-src=\"%s\">%s</span>" % (_token_to_src(b), escape(_pad(x)))
-             if b else escape(_pad(x))
+             if _token_to_src(b) else escape(_pad(x))
              for b, x in zip(bases, p)]
         html.append(u"<p>" + u"".join(p).strip() + u"</p>")
 
@@ -48,8 +48,8 @@ def _tokenize_jpn(paragraphs):
     for para in paragraphs:
         parts = mecab.collapse(mecab.parse(para))
         words.update(x.base for x in parts if x.base)
-        p = [u"<span data-src=\"%s\">%s</span>" % (_token_to_src(x.base), escape(_pad(x.surface))) if x.base
-             else escape(_pad(x.surface))
+        p = [u"<span data-src=\"%s\">%s</span>" % (escape(_token_to_src(x.base)), escape(x.surface))
+             if x.base and x.base.isalpha() else escape(x.surface)
              for x in parts]
         html.append(u"<p>" + u"".join(p) + u"</p>")
 
@@ -60,4 +60,5 @@ def tokenize(paragraphs, language):
     if language == "jpn":
         return _tokenize_jpn(paragraphs)
     else:
-        return _tokenize_other(paragraphs)
+        return _tokenize_eng(paragraphs)
+

@@ -11,6 +11,8 @@ class Migration(SchemaMigration):
         # Adding model 'Language'
         db.create_table(u'mediasnakebooks_language', (
             ('code', self.gf('django.db.models.fields.CharField')(max_length=3, primary_key=True)),
+            ('stardict', self.gf('django.db.models.fields.TextField')(null=True)),
+            ('dict_url', self.gf('django.db.models.fields.TextField')(null=True)),
         ))
         db.send_create_signal(u'mediasnakebooks', ['Language'])
 
@@ -56,7 +58,9 @@ class Migration(SchemaMigration):
         },
         u'mediasnakebooks.language': {
             'Meta': {'object_name': 'Language'},
-            'code': ('django.db.models.fields.CharField', [], {'max_length': '3', 'primary_key': 'True'})
+            'code': ('django.db.models.fields.CharField', [], {'max_length': '3', 'primary_key': 'True'}),
+            'dict_url': ('django.db.models.fields.TextField', [], {'null': 'True'}),
+            'stardict': ('django.db.models.fields.TextField', [], {'null': 'True'})
         },
         u'mediasnakebooks.word': {
             'Meta': {'object_name': 'Word'},

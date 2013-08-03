@@ -16,6 +16,7 @@ def main():
     print("\n\n")
     run(['./env/bin/python', 'manage.py', 'syncdb'])
     run(['./env/bin/python', 'manage.py', 'migrate'])
+    run(['./env/bin/python', 'manage.py', 'loaddata', 'base'])
     print("\n\n" + "-"*79)
     print("Answer 'yes' to the question")
     print("\n\n")

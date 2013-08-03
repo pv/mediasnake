@@ -1,0 +1,16 @@
+[
+  {
+    "pk": 1,
+    "model": "mediasnakebooks.language",
+    "fields": {
+        "code": "eng"
+    }
+  },
+  {
+    "pk": 2,
+    "model": "mediasnakebooks.language",
+    "fields": {
+        "code": "jpn"
+    }
+  }
+]

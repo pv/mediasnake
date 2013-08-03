@@ -45,7 +45,7 @@ for item, value in sorted(ini.items()):
     if item not in spec:
         extra_errors.append("- '%s': unknown setting" % (item,))
         continue
-    
+
 val = Validator()
 validation = ini.validate(val, preserve_errors=True)
 

@@ -13,6 +13,14 @@ IGNORED = 0
 class Language(models.Model):
     code = models.CharField(max_length=3, help_text="3-letter ISO language code", null=False, primary_key=True)
 
+    stardict = models.TextField(null=True, blank=True,
+                                help_text="Full file name of a Stardict format dictionary (on the server)")
+    dict_url = models.TextField(null=True, blank=True,
+                                help_text="Dictionary URL: @WORD@ is replaced by the word to search for")
+
+    def __unicode__(self):
+        return u"%s" % (self.code,)
+
 
 class Word(models.Model):
     language = models.ForeignKey(Language)

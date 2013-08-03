@@ -22,6 +22,10 @@ class Stardict(object):
     """
 
     def __init__(self, basename):
+        b, ext = os.path.splitext(basename)
+        if ext in ('.ifo', '.idx', '.dict', '.dict.dz'):
+            basename = b
+
         self.ifo_file = basename + ".ifo"
         self.idx_file = basename + ".idx"
         self.dict_file = basename + ".dict"
@@ -31,6 +35,14 @@ class Stardict(object):
         self.index = {}
 
         self._read_index()
+
+    def __del__(self):
+        self.close()
+
+    def close(self):
+        if self.dict_file_obj is not None:
+            self.dict_file_obj.close()
+            self.dict_file_obj = None
 
     def _read_index(self):
         if not os.path.isfile(self.dict_file):
@@ -65,7 +77,7 @@ class Stardict(object):
     def lookup(self, key):
         try:
             j1 = self.keys.index(key)
-        except IndexError:
+        except (IndexError, ValueError):
             return []
 
         j2 = j1

@@ -3,6 +3,17 @@
 {% block title %}{{ ebook.title }} [{{ ebook.author }}]{% endblock %}
 
 {% block content %}
+<div id="modal-word" class="modal hide fade">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3 id="modal-word-header" class="modal-header"></h3>
+  </div>
+  <div id="modal-word-body" class="modal-body">
+  </div>
+  <div class="modal-footer">
+    <a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>
+  </div>
+</div>
 <div class='ebook'>
   <div class='controls'>
     {% if prev %}
@@ -10,8 +21,15 @@
     {% endif %}
     <select id="language-select">
       <option class="study-lang" value="" selected>Choose study language</option>
-      {% for language in languages %}
-      <option class="study-lang" value="{{ language }}">{{ language }}</option>
+      {% for lang in languages %}
+      <option class="study-lang" 
+              value="{{ lang.code }}" 
+              data-token-url="{% url 'ebook-ajax-tokens' ebook.id pos lang.code %}"
+              data-dict-url="{% url 'ebook-ajax-dict' lang.code '@WORD@' %}"
+              data-external-dict-url="{{ lang.dict_url }}"
+              data-word-url="{% url 'ebook-ajax-word' lang.code '@WORD@' %}"
+              data-words-url="{% url 'ebook-ajax-words' lang.code %}"
+	      >{{ lang.code }}</option>
       {% endfor %}
     </select>
     {% if next %}
@@ -40,10 +58,19 @@
 <script>
 $("#language-select").change(function() {
     var lang = "";
+    var token_url = "";
+    var dict_url = "";
+    var external_dict_url = "";
+    var word_url = "";
     $("#language-select option:selected").each(function () {
         lang = $(this).attr("value");
+        token_url = $(this).attr("data-token-url");
+        dict_url = $(this).attr("data-dict-url");
+        external_dict_url = $(this).attr("data-external-dict-url");
+        word_url = $(this).attr("data-word-url");
+        words_url = $(this).attr("data-words-url");
     });
-    study.init("{% url 'ebook-ajax-tokens' ebook.id pos '@language@' %}", lang);
+    study.init(lang, token_url, dict_url, external_dict_url, word_url, words_url);
 });
 </script>
 {% endblock %}

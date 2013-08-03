@@ -43,3 +43,11 @@ div.controls select {
 div.controls a.pull-right {
     margin-top: 10px;
 }
+
+#modal-word h3 {
+    font-weight: normal;
+}
+
+#modal-word div.controls {
+    margin: 5px;
+}
