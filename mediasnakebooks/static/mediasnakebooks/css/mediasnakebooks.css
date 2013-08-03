@@ -1,0 +1,9 @@
+div.ebook {
+    max-width: 50em;
+    margin-left: 20px;
+}
+
+div.ebook-text {
+    margin-top: 30px;
+    margin-bottom: 30px;
+}

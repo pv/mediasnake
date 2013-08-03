@@ -108,8 +108,10 @@ def stream(request, id):
     # Do some housekeeping at the same time
     StreamingTicket.cleanup()
 
-    context = {'title': videos[0].title,
-               'entries': entries}
+    context = {
+        'title': videos[0].title,
+        'entries': entries,
+    }
 
     return render(request, "mediasnakefiles/stream.html", context)
 

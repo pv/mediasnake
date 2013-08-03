@@ -126,6 +126,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'mediasnake_sendfile',
     'mediasnakefiles',
+    'mediasnakebooks',
     'south',
 )
 

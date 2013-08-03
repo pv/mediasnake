@@ -1,0 +1,31 @@
+{% extends "mediasnakebooks/base.html" %}
+
+{% block title %}{{ ebook.title }} [{{ ebook.author }}]{% endblock %}
+
+{% block content %}
+<table>
+  <div class='ebook'>
+    <div>
+      {% if prev %}
+      <a class="btn" href="{% url 'ebook-pos' ebook.id prev %}">Prev</a>
+      {% endif %}
+      {% if next %}
+      <a class="btn pull-right" href="{% url 'ebook-pos' ebook.id next %}">Next</a>
+      {% endif %}
+    </div>
+    <div class='ebook-text'>
+      {% for p in paragraphs %}
+      <p>{{ p }}</p>
+      {% endfor %}
+    </div>
+    <div>
+      {% if prev %}
+      <a class="btn" href="{% url 'ebook-pos' ebook.id prev %}">Prev</a>
+      {% endif %}
+      {% if next %}
+      <a class="btn pull-right" href="{% url 'ebook-pos' ebook.id next %}">Next</a>
+      {% endif %}
+    </div>
+  </div>
+</table>
+{% endblock %}
