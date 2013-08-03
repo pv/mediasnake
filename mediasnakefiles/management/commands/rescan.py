@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.core.cache import cache
 
-from mediasnakefiles.models import scan, SCAN_LOCKFILE
+from mediasnakefiles.scanner import scan, SCAN_LOCKFILE
 
 class Command(BaseCommand):
     args = ''

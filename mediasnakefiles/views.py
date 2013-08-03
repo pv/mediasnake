@@ -12,8 +12,8 @@ from django.contrib.auth.decorators import login_required
 
 from mediasnake_sendfile import sendfile
 
-from mediasnakefiles.models import VideoFile, StreamingTicket, get_scan_status, spawn_rescan, \
-     get_thumbnail_filename
+from mediasnakefiles.models import VideoFile, StreamingTicket, get_thumbnail_filename
+from mediasnakefiles.scanner import get_scan_status, spawn_rescan
 
 
 def _sort_key(video_file):

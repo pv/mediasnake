@@ -8,7 +8,6 @@ import hashlib
 import datetime
 import fnmatch
 import random
-import json
 
 from django.db import models, transaction
 from django.conf import settings
@@ -18,14 +17,11 @@ from django.core.urlresolvers import reverse
 
 import django.utils.timezone
 
-from mediasnakefiles.lockfile import LockFile, LockFileError
-
 import logging
 
-logger = logging.getLogger('mediasnake')
+from mediasnakefiles.scanner import register_file_scanner, register_post_scanner, scan_message
 
-SCAN_LOCKFILE = os.path.join(settings.DATA_DIR, 'rescan.lock')
-SCAN_STATUS = os.path.join(settings.DATA_DIR, 'rescan.txt')
+logger = logging.getLogger('mediasnake')
 
 
 class VideoFile(models.Model):
@@ -197,124 +193,50 @@ def _streaming_ticket_cleanup_symlink(sender, instance, using, **kwargs):
         os.unlink(fn)
 
 
-def scan():
-    """
-    Scan the video directories for files.
-    """
-    try:
-        return _scan()
-    except:
-        import traceback
-        msg = traceback.format_exc()
-        logger.error(msg)
-        set_scan_status(None)
-        raise
-
-def _scan():
-    try:
-        with LockFile(SCAN_LOCKFILE, fail_if_active=True):
-            with transaction.commit_on_success():
-                existing_files = set()
-
-                for root in settings.MEDIASNAKEFILES_DIRS:
-                    for path, dirs, files in os.walk(root):
-                        msg = "Scanning directory: '%s'" % os.path.join(root, path)
-                        logger.info(msg)
-                        set_scan_status(msg)
-
-                        # Insert new files
-                        for basename in files:
-                            filename = os.path.normpath(os.path.join(root, path, basename))
-                            mimetype = get_mime_type(filename)
-
-                            # Check that the extension and mime type
-                            # are indicative of a video file
-                            for file_pattern, mime_pattern, replacement_mimetype in \
-                                    settings.MEDIASNAKEFILES_ACCEPTED_FILE_TYPES:
-                                if (fnmatch.fnmatch(mimetype, mime_pattern) and
-                                    fnmatch.fnmatch(basename, file_pattern)):
-                                    if replacement_mimetype is not None:
-                                        mimetype = replacement_mimetype
-                                    break
-                            else:
-                                continue
-
-                            existing_files.add(filename)
-
-                            # Check if the file is already there
-                            try:
-                                video_file = VideoFile.objects.get(filename=filename)
-                                continue
-                            except VideoFile.DoesNotExist:
-                                pass
-
-                            # Create it
-                            video_file = VideoFile(filename=filename, mimetype=mimetype)
-                            video_file.save()
-
-            # Remove non-existing files
-            msg = "Cleaning up non-existing video entries..."
-            logger.info(msg)
-            set_scan_status(msg)
-
-            files_in_db = set(VideoFile.objects.values_list('filename', flat=True))
-            to_remove = files_in_db.difference(existing_files)
-            for filename in to_remove:
-                VideoFile.objects.get(filename=filename).delete()
-
-            # Create thumbnails, if missing
-            objects = VideoFile.objects.all()
-            for video_file in objects:
-                if video_file.create_thumbnail():
-                    msg = "Creating thumbnails: %r" % (video_file.filename,)
-                    logger.info(msg)
-                    set_scan_status(msg)
-
-            msg = "Scan complete"
-            logger.info(msg)
-            set_scan_status(None)
-
-            return True
-    except LockFileError:
+@register_file_scanner
+def _video_file_scanner(filename, mimetype):
+    basename = os.path.basename(filename)
+    
+    # Check that the extension and mime type
+    # are indicative of a video file
+    for file_pattern, mime_pattern, replacement_mimetype in \
+            settings.MEDIASNAKEFILES_ACCEPTED_FILE_TYPES:
+        if (fnmatch.fnmatch(mimetype, mime_pattern) and
+            fnmatch.fnmatch(basename, file_pattern)):
+            if replacement_mimetype is not None:
+                mimetype = replacement_mimetype
+            break
+    else:
         return False
 
+    # Check if the file is already there
+    try:
+        video_file = VideoFile.objects.get(filename=filename)
+    except VideoFile.DoesNotExist:
+        video_file = VideoFile(filename=filename, mimetype=mimetype)
+        video_file.save()
 
-def set_scan_status(status):
-    if status is None:
-        try:
-            os.unlink(SCAN_STATUS)
-        except OSError:
-            pass
-        return
-
-    now = django.utils.timezone.now()
-    timestamp = now.strftime('%Y-%m-%d %H:%M:%S %Z')
-
-    with open(SCAN_STATUS, 'wb') as f:
-        obj = {'status': status, 'timestamp': timestamp}
-        json.dump(obj, f)
+    return True
 
 
-def get_scan_status():
-    if LockFile.check(SCAN_LOCKFILE):
-        with open(SCAN_STATUS, 'rb') as f:
-            return f.read()
-    return None
+@register_post_scanner
+def _video_file_post_scan(existing_files):
+    # Remove non-existent entries
+    files_in_db = set(VideoFile.objects.values_list('filename', flat=True))
+    to_remove = files_in_db.difference(existing_files)
+    for filename in to_remove:
+        VideoFile.objects.get(filename=filename).delete()
+
+    # Create thumbnails, if missing
+    objects = VideoFile.objects.all()
+    for video_file in objects:
+        if video_file.create_thumbnail():
+            scan_message("Creating thumbnails: %r" % (video_file.filename,))
   
 
 def get_thumbnail_filename(thumbnail):
     thumbnail = re.sub('[^a-f0-9]', '', thumbnail)
     return os.path.join(settings.SENDFILE_ROOT, thumbnail) + ".jpg"
-
-
-def get_mime_type(filename):
-    p = subprocess.Popen(['file', '-b', '--mime-type', filename],
-                         stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out, err = p.communicate()
-    if p.returncode != 0:
-        return u""
-    else:
-        return out.strip()
 
 
 def hash_content(filename):
@@ -356,20 +278,3 @@ def get_secret_128(salt=""):
 
 def get_random_bytes(nbytes):
     return "".join(chr(random.getrandbits(8)) for _ in range(nbytes))
-
-
-def spawn_rescan():
-    base_dir = os.path.abspath(os.path.join(settings.PROJECT_DIR, '..'))
-    manage_py = os.path.join(base_dir, 'manage.py')
-
-    devnull_w = open('/dev/null', 'wb')
-    devnull_r = open('/dev/null', 'wb')
-
-    python = sys.executable
-    env_python = os.path.join(base_dir, 'env', 'bin', 'python')
-    if os.path.isfile(env_python):
-        python = env_python
-
-    subprocess.Popen([python, manage_py, 'rescan'],
-                     stdin=devnull_r, stdout=devnull_w, stderr=devnull_r,
-                     cwd=base_dir, close_fds=True)
