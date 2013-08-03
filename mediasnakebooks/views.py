@@ -51,17 +51,31 @@ def ebook(request, id, pos):
         'ebook': ebook,
         'paragraphs': paragraphs,
         'chapters': chapters,
+        'pos': pos,
         'next': pos + 1 if pos + 1 < len(chapters) else None,
         'prev': pos - 1 if pos > 0 else None,
+        'languages': ['eng', 'jpn', 'other'],
         }
 
     return render(request, "mediasnakebooks/ebook.html", context)
 
 
 @login_required
+@cache_control(private=True, max_age=30*60)
+@cache_page(30*60)
 def tokens(request, id, pos, language):
     ebook, epub, chapters, paragraphs, pos = _get_epub(id, pos)
     words, html = tokenize(paragraphs, language)
 
-    content = json.dumps(dict(html=html, words=words))
+    known = []
+    for w in words:
+        try:
+            word_obj = Word.objects.get(base_form=words)
+            known.append(word_obj.known)
+        except Word.DoesNotExist:
+            known.append(5)
+
+    html = re.sub(u' </span>', u'</span> ', html)
+    html = re.sub(u'(<span[^>]*>) ', ur' \1', html)
+    content = json.dumps(dict(html=html, words=words, known=known))
     return HttpResponse(content, content_type="application/json")

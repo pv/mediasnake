@@ -3,29 +3,47 @@
 {% block title %}{{ ebook.title }} [{{ ebook.author }}]{% endblock %}
 
 {% block content %}
-<table>
-  <div class='ebook'>
-    <div>
-      {% if prev %}
-      <a class="btn" href="{% url 'ebook-pos' ebook.id prev %}">Prev</a>
-      {% endif %}
-      {% if next %}
-      <a class="btn pull-right" href="{% url 'ebook-pos' ebook.id next %}">Next</a>
-      {% endif %}
-    </div>
-    <div class='ebook-text'>
-      {% for p in paragraphs %}
-      <p>{{ p }}</p>
+<div class='ebook'>
+  <div class='controls'>
+    {% if prev %}
+    <a class="btn" href="{% url 'ebook-pos' ebook.id prev %}">Prev</a>
+    {% endif %}
+    <select id="language-select">
+      <option class="study-lang" value="" selected>Choose study language</option>
+      {% for language in languages %}
+      <option class="study-lang" value="{{ language }}">{{ language }}</option>
       {% endfor %}
-    </div>
-    <div>
-      {% if prev %}
-      <a class="btn" href="{% url 'ebook-pos' ebook.id prev %}">Prev</a>
-      {% endif %}
-      {% if next %}
-      <a class="btn pull-right" href="{% url 'ebook-pos' ebook.id next %}">Next</a>
-      {% endif %}
-    </div>
+    </select>
+    {% if next %}
+    <a class="btn pull-right" href="{% url 'ebook-pos' ebook.id next %}">Next</a>
+    {% endif %}
   </div>
-</table>
+  <div class="ebook-text" id="ebook-text">
+    {% for p in paragraphs %}
+    <p>{{ p }}</p>
+    {% endfor %}
+  </div>
+  <div class='controls'>
+    {% if prev %}
+    <a class="btn" href="{% url 'ebook-pos' ebook.id prev %}">Prev</a>
+    {% endif %}
+    {% if next %}
+    <a class="btn pull-right" href="{% url 'ebook-pos' ebook.id next %}">Next</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script type="text/javascript" src="{{ STATIC_URL }}mediasnakebooks/js/study.js?version={{ MEDIASNAKE_VERSION }}"></script>
+<script>
+$("#language-select").change(function() {
+    var lang = "";
+    $("#language-select option:selected").each(function () {
+        lang = $(this).attr("value");
+    });
+    study.init("{% url 'ebook-ajax-tokens' ebook.id pos '@language@' %}", lang);
+});
+</script>
 {% endblock %}

@@ -7,3 +7,39 @@ div.ebook-text {
     margin-top: 30px;
     margin-bottom: 30px;
 }
+
+#ebook-text span.known-5 {
+    background-color: #ddddff;
+}
+
+#ebook-text span.known-4 {
+    background-color: #ffdddd;
+}
+
+#ebook-text span.known-3 {
+    background-color: #ddffdd;
+}
+
+#ebook-text span.known-2 {
+    background-color: #ffffdd;
+}
+
+#ebook-text span.known-1 {
+    background-color: #ffddff;
+}
+
+#ebook-text span.known-0 {
+    background-color: #ffffff;
+}
+
+div.controls {
+    line-height: 30px;
+}
+
+div.controls select {
+    margin-top: 10px;
+}
+
+div.controls a.pull-right {
+    margin-top: 10px;
+}
