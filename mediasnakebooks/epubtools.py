@@ -58,7 +58,7 @@ def html_to_paragraphs(html):
 
 class BaseEpub(object):
     def _mangle_author(self, name):
-        if ',' not in name:
+        if u',' not in name:
             parts = name.split()
             j = len(parts) - 1
             while j > 0:
@@ -82,6 +82,7 @@ class BaseEpub(object):
 
 class Epub(BaseEpub):
     def __init__(self, filename):
+        assert isinstance(filename, unicode)
         self.pub = epub.open_epub(filename)
 
     def chapters(self):
@@ -115,17 +116,19 @@ class Epub(BaseEpub):
 class TxtFile(BaseEpub):
 
     FILE_RES = [
-        re.compile(r"^(?P<auth>[^-\[\]]+) - (?P<titl>[^\[\]]+) \[(?P<lang>.*)\]$"),
-        re.compile(r"^(?P<auth>[^-]+) - (?P<titl>.+)$"),
-        re.compile(r"^(?P<auth>[^-\[\]]+)\s*-\s*(?P<titl>[^\[\]]+) \[(?P<lang>.*)\]$"),
-        re.compile(r"^(?P<auth>[^-]+)\s*-\s*(?P<titl>.+)$"),
-        re.compile(r"^(?P<titl>[^\[\]]+) \[(?P<lang>.+)\]$"),
-        re.compile(r"^(?P<titl>.+)$")
+        re.compile(ur"^(?P<auth>[^-\[\]]+) - (?P<titl>[^\[\]]+) \[(?P<lang>.*)\]$"),
+        re.compile(ur"^(?P<auth>[^-]+) - (?P<titl>.+)$"),
+        re.compile(ur"^(?P<auth>[^-\[\]]+)\s*[-_]\s*(?P<titl>[^\[\]]+) \[(?P<lang>.*)\]$"),
+        re.compile(ur"^(?P<auth>[^-]+)\s*[-_]\s*(?P<titl>.+)$"),
+        re.compile(ur"^(?P<titl>[^\[\]]+) \[(?P<lang>.+)\]$"),
+        re.compile(ur"^(?P<titl>.+)$")
     ]
 
     CHAPTER_SIZE = 200
 
     def __init__(self, filename):
+        assert isinstance(filename, unicode)
+
         self.filename = filename
         self._chapters = []
         self._content = {}
