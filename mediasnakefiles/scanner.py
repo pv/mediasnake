@@ -36,6 +36,8 @@ def scan():
 
 def _scan():
     try:
+        fsencoding = sys.getfilesystemencoding()
+        
         with LockFile(SCAN_LOCKFILE, fail_if_active=True):
             existing_files = set()
             mime_cache = MimeCache()
@@ -53,7 +55,10 @@ def _scan():
                     # Insert new files
                     for basename in files:
                         filename = os.path.normpath(os.path.join(root, path, basename))
-                        existing_files.add(filename)
+                        try:
+                            existing_files.add(filename.decode(fsencoding))
+                        except UnicodeError:
+                            scan_message("Invalid file name charset: %r" % (filename,))
 
             # Process files
             for hook in SCAN_HOOKS:
