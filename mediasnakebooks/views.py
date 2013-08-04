@@ -10,6 +10,7 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.cache import cache_control
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from mediasnakebooks.models import Ebook, Word, Language
 from mediasnakebooks.epubtools import open_epub
@@ -19,6 +20,18 @@ from mediasnakebooks._stardict import Stardict
 @login_required
 def index(request):
     books = Ebook.objects.order_by('author', 'title').all()
+    paginator = Paginator(books, 500)
+
+    page = request.GET.get('page')
+    try:
+        books = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        books = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        books = paginator.page(paginator.num_pages)
+
     context = {'books': books}
     return render(request, "mediasnakebooks/index.html", context)
 
