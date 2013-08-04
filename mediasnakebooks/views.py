@@ -77,8 +77,8 @@ def ebook(request, id, pos):
 
 
 @login_required
-#@cache_control(private=True, max_age=30*60)
-#@cache_page(30*60)
+@cache_control(private=True, max_age=30*60)
+@cache_page(30*24*60*60)
 def tokens(request, id, pos, language):
     ebook, epub, chapters, paragraphs, pos = _get_epub(id, pos)
     words, html = tokenize(paragraphs, language)
@@ -90,6 +90,7 @@ def tokens(request, id, pos, language):
 
 
 @login_required
+@cache_page(30*24*60*60)
 def word_dict(request, language, word):
     try:
         lang = Language.objects.get(code=language)
