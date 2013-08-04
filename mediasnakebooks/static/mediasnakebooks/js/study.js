@@ -88,6 +88,8 @@ var study = (function() {
 	}
 	$("#modal-word-notes").val(note);
 
+	$("#modal-word-dict").text("<Loading dictionary...>");
+
 	dictLookup(word, function(data) {
 	    if (!data['error']) {
 		$("#modal-word-dict").text(data["text"]);
