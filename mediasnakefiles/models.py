@@ -19,7 +19,7 @@ import django.utils.timezone
 
 import logging
 
-from mediasnakefiles.scanner import register_file_scanner, register_post_scanner, scan_message
+from mediasnakefiles.scanner import register_scanner, scan_message
 
 logger = logging.getLogger('mediasnake')
 
@@ -193,37 +193,35 @@ def _streaming_ticket_cleanup_symlink(sender, instance, using, **kwargs):
         os.unlink(fn)
 
 
-@register_file_scanner
-def _video_file_scanner(filename, mimetype):
-    basename = os.path.basename(filename)
-    
-    # Check that the extension and mime type
-    # are indicative of a video file
-    for file_pattern, mime_pattern, replacement_mimetype in \
-            settings.MEDIASNAKEFILES_ACCEPTED_FILE_TYPES:
-        if (fnmatch.fnmatch(mimetype, mime_pattern) and
-            fnmatch.fnmatch(basename, file_pattern)):
-            if replacement_mimetype is not None:
-                mimetype = replacement_mimetype
-            break
-    else:
-        return False
+@register_scanner
+def _video_scanner(files):
+    video_files = set()
 
-    # Check if the file is already there
-    try:
-        video_file = VideoFile.objects.get(filename=filename)
-    except VideoFile.DoesNotExist:
-        video_file = VideoFile(filename=filename, mimetype=mimetype)
+    for filename, mimetype in files.iteritems():
+        basename = os.path.basename(filename)
+
+        # Check that the extension and mime type
+        # are indicative of a video file
+        for file_pattern, mime_pattern, replacement_mimetype in \
+                settings.MEDIASNAKEFILES_ACCEPTED_FILE_TYPES:
+            if (fnmatch.fnmatch(mimetype, mime_pattern) and
+                fnmatch.fnmatch(basename, file_pattern)):
+                if replacement_mimetype is not None:
+                    mimetype = replacement_mimetype
+                video_files.add(filename)
+
+    files_in_db = set(VideoFile.objects.values_list('filename', flat=True))
+
+    # Add files not yet in DB
+    to_add = video_files.difference(files_in_db)
+    for filename in to_add:
+        scan_message("Adding video: %r" % (filename,))
+        video_file = VideoFile(filename=filename, mimetype=files[filename])
         video_file.save()
 
-    return True
-
-
-@register_post_scanner
-def _video_file_post_scan(existing_files):
     # Remove non-existent entries
-    files_in_db = set(VideoFile.objects.values_list('filename', flat=True))
-    to_remove = files_in_db.difference(existing_files)
+    scan_message("Cleaning up non-existing videos...")
+    to_remove = files_in_db.difference(video_files)
     for filename in to_remove:
         VideoFile.objects.get(filename=filename).delete()
 

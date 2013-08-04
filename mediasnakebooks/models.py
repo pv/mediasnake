@@ -2,7 +2,7 @@ import os
 
 from django.db import models
 
-from mediasnakefiles.scanner import register_file_scanner, register_post_scanner, scan_message
+from mediasnakefiles.scanner import register_scanner, scan_message
 from mediasnakebooks.epubtools import open_epub
 
 UNKNOWN = 5
@@ -37,52 +37,52 @@ class Ebook(models.Model):
     author = models.TextField()
 
 
-@register_file_scanner
-def _book_scan(filename, mimetype):
-    ok = (mimetype in ("application/epub+zip",)
-          or filename.endswith('.epub')
-          or filename.endswith('.txt')
-          or filename.endswith('.txt.gz')
-          or filename.endswith('.txt.bz2'))
-    if not ok:
-        return False
+@register_scanner
+def _book_scan(files):
+    book_files = set()
 
-    try:
-        ebook = Ebook.objects.get(filename=filename)
-        return True
-    except Ebook.DoesNotExist:
-        pass
-
-    title = os.path.splitext(os.path.basename(filename))[0]
-    author = None
-
-    try:
-        pub = open_epub(filename)
-
-        try:
-            title = pub.title
-        except (IndexError, AttributeError):
-            pass
-
-        try:
-            author = pub.author
-        except (IndexError, AttributeError):
-            pass
-    except:
-        # Failed to parse
-        scan_message("Failed to open Epub file %r" % (filename,))
-        return False
-
-    ebook = Ebook(filename=filename, title=title, author=author)
-    ebook.save()
-
-    return True
+    for filename, mimetype in files.iteritems():
+        ok = (mimetype in ("application/epub+zip",)
+              or filename.endswith('.epub')
+              or filename.endswith('.txt')
+              or filename.endswith('.txt.gz')
+              or filename.endswith('.txt.bz2'))
+        if ok:
+            book_files.add(filename)
 
 
-@register_post_scanner
-def _book_post_scan(existing_files):
-    # Remove non-existent entries
     files_in_db = set(Ebook.objects.values_list('filename', flat=True))
-    to_remove = files_in_db.difference(existing_files)
+
+    # Add files not yet in DB
+    to_add = book_files.difference(files_in_db)
+    for filename in to_add:
+        title = os.path.splitext(os.path.basename(filename))[0]
+        author = None
+
+        try:
+            pub = open_epub(filename)
+
+            try:
+                title = pub.title
+            except (IndexError, AttributeError):
+                pass
+
+            try:
+                author = pub.author
+            except (IndexError, AttributeError):
+                pass
+        except:
+            # Failed to parse
+            scan_message("Failed to open Epub file %r" % (filename,))
+            return False
+
+        scan_message("Adding book: %r" % (filename,))
+
+        ebook = Ebook(filename=filename, title=title, author=author)
+        ebook.save()
+
+    # Remove non-existent entries
+    scan_message("Cleaning up non-existing books...")
+    to_remove = files_in_db.difference(book_files)
     for filename in to_remove:
         Ebook.objects.get(filename=filename).delete()

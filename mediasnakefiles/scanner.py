@@ -17,15 +17,9 @@ SCAN_LOCKFILE = os.path.join(settings.DATA_DIR, 'rescan.lock')
 SCAN_STATUS = os.path.join(settings.DATA_DIR, 'rescan.txt')
 
 SCAN_HOOKS = []
-SCAN_POST_HOOKS = []
 
-def register_file_scanner(func):
-    if func not in SCAN_HOOKS:
-        SCAN_HOOKS.append(func)
-
-def register_post_scanner(func):
-    if func not in SCAN_POST_HOOKS:
-        SCAN_POST_HOOKS.append(func)
+def register_scanner(func):
+    SCAN_HOOKS.append(func)
 
 def scan():
     """
@@ -43,34 +37,27 @@ def scan():
 def _scan():
     try:
         with LockFile(SCAN_LOCKFILE, fail_if_active=True):
-            existing_files = set()
+            existing_files = {}
 
-            with transaction.commit_on_success():
-                for root in settings.MEDIASNAKEFILES_DIRS:
-                    for path, dirs, files in os.walk(root, topdown=True):
-                        msg = "Scanning directory: '%s'" % os.path.join(root, path)
-                        logger.info(msg)
-                        set_scan_status(msg)
+            # Scan for all files (batch operations are faster)
+            for root in settings.MEDIASNAKEFILES_DIRS:
+                for path, dirs, files in os.walk(root, topdown=True):
+                    msg = "Scanning directory: '%s'" % os.path.join(root, path)
+                    logger.info(msg)
+                    set_scan_status(msg)
 
-                        dirs.sort()
-                        files.sort()
+                    dirs.sort()
+                    files.sort()
 
-                        # Insert new files
-                        for basename in files:
-                            filename = os.path.normpath(os.path.join(root, path, basename))
-                            mimetype = get_mime_type(filename)
+                    # Insert new files
+                    for basename in files:
+                        filename = os.path.normpath(os.path.join(root, path, basename))
+                        mimetype = get_mime_type(filename)
+                        existing_files[filename] = mimetype
 
-                            existing_files.add(filename)
-
-                            for hook in SCAN_HOOKS:
-                                if hook(filename, mimetype):
-                                    break
-
-            # Remove non-existing files
-            scan_message("Cleaning up non-existing entries...")
-
-            with transaction.commit_on_success():
-                for hook in SCAN_POST_HOOKS:
+            # Process files
+            for hook in SCAN_HOOKS:
+                with transaction.commit_on_success():
                     hook(existing_files)
 
             scan_message("Scan complete")
