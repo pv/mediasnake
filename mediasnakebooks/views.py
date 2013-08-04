@@ -48,7 +48,7 @@ def ebook(request, id, pos):
     ebook, epub, chapters, paragraphs, pos = _get_epub(id, pos)
 
     languages = [dict(code=lang.code, dict_url=lang.dict_url)
-                 for lang in Language.objects.all()]
+                 for lang in Language.objects.order_by('code').all()]
 
     context = {
         'ebook': ebook,
