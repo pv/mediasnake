@@ -17,6 +17,14 @@
   {% if books.has_next %}
   <a class="btn" href="?page={{ books.next_page_number }}">Next</a>
   {% endif %}
+
+  <span class="search">
+    <form action="" method="GET">
+      <input class="text" type="text" name="search" value="{{ search_str }}">
+      <input type="hidden" name="page" value="{{ books.number }}">
+      <input class="btn" type="Submit" value="Search">
+    </form>
+  </span>
 </div>
 
 <table>
@@ -36,6 +44,16 @@
 
 {% block extra_js %}
 <script>
+$("#page-select").change(function() {
+    var dest = "";
+    $("#page-select option:selected").each(function () {
+        dest = $(this).attr("value");
+    });
+    if (dest != "") {
+        window.location = "?page=" + dest;
+    }
+});
+
 $("#page-select").change(function() {
     var dest = "";
     $("#page-select option:selected").each(function () {

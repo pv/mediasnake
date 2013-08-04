@@ -4,6 +4,7 @@ import time
 import json
 
 from django.conf import settings
+from django.db.models import Q
 from django.http import HttpResponse, Http404, HttpResponseForbidden, StreamingHttpResponse
 from django.core.cache import cache
 from django.views.decorators.cache import cache_page
@@ -18,9 +19,16 @@ from mediasnakebooks.tokenize import tokenize
 from mediasnakebooks._stardict import Stardict
 
 @login_required
-@cache_page(30*24*60*60)
 def index(request):
-    books = Ebook.objects.order_by('author', 'title').values('id', 'author', 'title')
+    query = Ebook.objects
+
+    search_str = request.GET.get('search')
+    if search_str:
+        query = query.filter(Q(author__icontains=search_str) | Q(title__icontains=search_str))
+    else:
+        search_str = u''
+
+    books = query.order_by('author', 'title').values('id', 'author', 'title')
     paginator = Paginator(books, 50)
 
     page = request.GET.get('page')
@@ -33,7 +41,9 @@ def index(request):
         # If page is out of range (e.g. 9999), deliver last page of results.
         books = paginator.page(paginator.num_pages)
 
-    context = {'books': books, 'pages': range(1, paginator.num_pages+1)}
+    context = {'books': books,
+               'pages': range(1, paginator.num_pages+1),
+               'search_str': search_str}
     return render(request, "mediasnakebooks/index.html", context)
 
 

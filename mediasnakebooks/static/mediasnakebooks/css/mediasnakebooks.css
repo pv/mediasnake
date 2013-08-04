@@ -16,6 +16,18 @@ div.controls select {
     margin-top: 10px;
 }
 
+div.controls input.text {
+    margin-top: 10px;
+}
+
+div.controls .search {
+    margin-left: 30px;
+}
+
+div.controls .search form {
+    display: inline;
+}
+
 div.controls a.pull-right {
     margin-top: 10px;
 }
