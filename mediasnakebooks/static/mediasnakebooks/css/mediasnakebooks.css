@@ -29,27 +29,31 @@ div.controls a.pull-right {
 }
 
 #modal-word .btn-known-5 {
-    background-image: linear-gradient(to bottom, rgb(208, 204, 251), rgb(230, 230, 230));
+    background-image: linear-gradient(to bottom, rgb(208, 204, 251), rgb(188, 184, 231));
 }
 
 #modal-word .btn-known-4 {
-    background-image: linear-gradient(to bottom, rgb(251, 203, 240), rgb(230, 230, 230));
+    background-image: linear-gradient(to bottom, rgb(251, 203, 240), rgb(231, 183, 220));
 }
 
 #modal-word .btn-known-3 {
-    background-image: linear-gradient(to bottom, rgb(251, 203, 210), rgb(230, 230, 230));
+    background-image: linear-gradient(to bottom, rgb(251, 203, 210), rgb(231, 183, 190));
 }
 
 #modal-word .btn-known-2 {
-    background-image: linear-gradient(to bottom, rgb(251, 233, 203), rgb(230, 230, 230));
+    background-image: linear-gradient(to bottom, rgb(251, 233, 203), rgb(231, 213, 183));
 }
 
 #modal-word .btn-known-1 {
-    background-image: linear-gradient(to bottom, rgb(207, 251, 203), rgb(230, 230, 230));
+    background-image: linear-gradient(to bottom, rgb(207, 251, 203), rgb(187, 231, 183));
 }
 
 #modal-word .btn-known-0 {
     background-image: linear-gradient(to bottom, rgb(255, 255, 255), rgb(230, 230, 230));
+}
+
+#modal-word .btn.active {
+    font-weight: bold;
 }
 
 #ebook-text span.known-5 {

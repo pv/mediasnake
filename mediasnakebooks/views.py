@@ -77,8 +77,8 @@ def ebook(request, id, pos):
 
 
 @login_required
-@cache_control(private=True, max_age=30*60)
-@cache_page(30*60)
+#@cache_control(private=True, max_age=30*60)
+#@cache_page(30*60)
 def tokens(request, id, pos, language):
     ebook, epub, chapters, paragraphs, pos = _get_epub(id, pos)
     words, html = tokenize(paragraphs, language)
@@ -126,6 +126,7 @@ def words(request, language):
 
     words = request.POST.getlist('words[]')
     known = [5]*len(words)
+    notes = [u""]*len(words)
 
     chunksize = 50
     for j in range(0, len(words), chunksize):
@@ -133,8 +134,9 @@ def words(request, language):
         for w in word_objs:
             j = words.index(w.base_form)
             known[j] = w.known
+            notes[j] = w.notes
 
-    content = json.dumps(dict(words=words, known=known))
+    content = json.dumps(dict(words=words, known=known, notes=notes))
     return HttpResponse(content, content_type="application/json")
 
 
@@ -149,15 +151,17 @@ def word_adjust(request, language, word):
         raise Http404
 
     try:
-        level = int(request.POST['level'])
-        if level < 0 or level > 5:
+        known = int(request.POST['known'])
+        if known < 0 or known > 5:
             raise ValueError
-    except ValueError:
+        notes = unicode(request.POST['notes'])
+    except (ValueError, KeyError):
         return HttpResponse("400 Bad request", status=400)
 
     word, created = Word.objects.get_or_create(base_form=word, language=lang)
-    word.known = level
+    word.known = known
+    word.notes = notes
     word.save()
 
-    content = json.dumps(dict(word=word.base_form, level=level))
+    content = json.dumps(dict(error=False))
     return HttpResponse(content, content_type="application/json")

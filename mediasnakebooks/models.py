@@ -11,28 +11,34 @@ IGNORED = 0
 
 
 class Language(models.Model):
-    code = models.CharField(max_length=3, help_text="3-letter ISO language code", null=False, primary_key=True)
-
+    code = models.CharField(max_length=3, help_text="3-letter ISO language code",
+        null=False, primary_key=True, unique=True)
     stardict = models.TextField(null=True, blank=True,
-                                help_text="Full file name of a Stardict format dictionary (on the server)")
+        help_text="Full file name of a Stardict format dictionary (on the server)")
     dict_url = models.TextField(null=True, blank=True,
-                                help_text="Dictionary URL: @WORD@ is replaced by the word to search for")
+        help_text="Dictionary URL: @WORD@ is replaced by the word to search for")
 
     def __unicode__(self):
         return u"%s" % (self.code,)
 
 
 class Word(models.Model):
-    language = models.ForeignKey(Language)
+    language = models.ForeignKey(Language, null=False)
+    base_form = models.CharField(max_length=128, null=False, help_text="Base form of the word")
 
-    base_form = models.TextField(null=False, help_text="Base form of the word")
-    alt_form = models.TextField(null=True, help_text="Alternative word form (e.g. )")
-    notes = models.TextField(null=True)
-    known = models.IntegerField(default=5, help_text="Knowledge level: 5 - unknown, ..., 1 - well known, 0 - ignored")
+    notes = models.TextField(null=True, blank=True)
+    known = models.IntegerField(default=5, null=False, blank=False,
+        help_text="Knowledge level: 5 - unknown, ..., 1 - well known, 0 - ignored")
+
+    class Meta:
+        unique_together = (('language', 'base_form'),)
+
+    def __unicode__(self):
+        return u"%s: %s" % (self.language.code, self.base_form)
 
 
 class Ebook(models.Model):
-    filename = models.TextField()
+    filename = models.TextField(null=False)
     title = models.TextField()
     author = models.TextField()
 

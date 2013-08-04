@@ -7,11 +7,33 @@
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
     <h3 id="modal-word-header" class="modal-header"></h3>
+    <input type="hidden" id="modal-word-word"></input>
   </div>
   <div id="modal-word-body" class="modal-body">
+    <div class="controls">
+      <div id="modal-word-known-group" class="btn-group" data-toggle="buttons-radio">
+	<button class="btn btn-known-5 modal-word-known" value="5" id="modal-word-known-5">[Unk]</button>
+	<button class="btn btn-known-4 modal-word-known" value="4" id="modal-word-known-4">[4]</button>
+	<button class="btn btn-known-3 modal-word-known" value="3" id="modal-word-known-3">[3]</button>
+	<button class="btn btn-known-2 modal-word-known" value="2" id="modal-word-known-2">[2]</button>
+	<button class="btn btn-known-1 modal-word-known" value="1" id="modal-word-known-1">[1]</button>
+	<button class="btn btn-known-0 modal-word-known" value="0" id="modal-word-known-0">[Ign]</button>
+      </div>
+    </div>
+    <div class="controls">
+      <span>
+	<label>Notes:</label>
+	<textarea id="modal-word-notes"></textarea>
+      </span>
+    </div>
+    <div>
+      <a id="modal-word-external-dict" class="btn btn-link pull-right" target="_blank" href="#">External dictionary</a>
+    </div>
+    <pre id="modal-word-dict"></pre>
   </div>
   <div class="modal-footer">
-    <a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>
+    <a href="#" class="btn btn" data-dismiss="modal">Close</a>
+    <a class="btn btn-primary" onclick="study.adjust();">Save</a>
   </div>
 </div>
 <div class='ebook'>

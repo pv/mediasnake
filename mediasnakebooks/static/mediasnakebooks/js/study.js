@@ -1,6 +1,7 @@
 var study = (function() {
     var words;
     var known;
+    var notes;
     var language;
     var dict_url;
     var external_dict_url;
@@ -30,6 +31,7 @@ var study = (function() {
 	    $.post(words_url, { "words": data["words"] }, function (data) { 
 		words = data['words'];
 		known = data['known'];
+		notes = data['notes'];
 		updateWordKnowledge();
 	    });
 	});
@@ -62,47 +64,60 @@ var study = (function() {
 
     var popupWordModal = function(word) {
 	$("#modal-word-header").text(word);
-	html = "<div class=\"controls\">";
-	html = html + "<a class=\"btn btn-known-5\" onclick=\"study.adjust('" + escape(word) + "', 5);\">[Unk]</a> ";
-	html = html + "<a class=\"btn btn-known-4\" onclick=\"study.adjust('" + escape(word) + "', 4);\">[4]</a> ";
-	html = html + "<a class=\"btn btn-known-3\" onclick=\"study.adjust('" + escape(word) + "', 3);\">[3]</a> ";
-	html = html + "<a class=\"btn btn-known-2\" onclick=\"study.adjust('" + escape(word) + "', 2);\">[2]</a> ";
-	html = html + "<a class=\"btn btn-known-1\" onclick=\"study.adjust('" + escape(word) + "', 1);\">[1]</a> ";
-	html = html + "<a class=\"btn btn-known-0\" onclick=\"study.adjust('" + escape(word) + "', 0);\">[Ign]</a> ";
-	html = html + "</div>";
+	$("#modal-word-word").attr("value", word);
 
 	if (external_dict_url) {
 	    var url;
 	    url = external_dict_url.replace('@WORD@', word).replace('@word@', word);
-	    html = html + "<div><a class=\"btn btn-link pull-right\" target=\"_blank\" href=\"" + url + "\">External dictionary</a><div>";
+	    $("#modal-word-external-dict").attr('href', url);
+	    $("#modal-word-external-dict").removeClass('hide');
+	}
+	else {
+	    $("#modal-word-external-dict").addClass('hide');
 	}
 
-	html = html + "<pre id=\"modal-word-dictionary\"></pre>";
-	$("#modal-word-body").html(html);
+	$(".modal-word-known").removeClass('active');
+	level = known[words.indexOf(word)];
+	$("#modal-word-known-" + level).addClass('active');
+
+	note = notes[words.indexOf(word)];
+	if (!note) {
+	    note = "";
+	}
+	$("#modal-word-notes").val(note);
 
 	dictLookup(word, function(data) {
 	    if (!data['error']) {
-		$("#modal-word-dictionary").text(data["text"]);
+		$("#modal-word-dict").text(data["text"]);
 	    }
 	    else {
-		$("#modal-word-dictionary").text("Dictionary lookup failed: " + data["text"]);
+		$("#modal-word-dict").text("Dictionary lookup failed: " + data["text"]);
 	    }
 	});
 
 	$("#modal-word").modal();
     }
 
-    var adjust = function (word, level) {
-	var entry = this;
-	word = unescape(word);
-	$.post(word_url.replace('@WORD@', word),  { "level": level }, function(data) {
-	    if (data["word"]) {
-		var w = data["word"];
-		var level = data["level"];
-		var selector = ".word[data-src=\"" + w + "\"]";
-		known[words.indexOf(w)] = level;
+    var adjust = function () {
+	var word, level, note, data;
+
+	word = $("#modal-word-word").attr("value");
+	note = $("#modal-word-notes").val();
+
+	$("#modal-word .modal-word-known.active").each(function () {
+	    level = $(this).attr("value");
+	});
+
+	data = { "known": level, "notes": note };
+
+	$.post(word_url.replace('@WORD@', word), data, function(data) {
+	    if (!data["error"]) {
+		var selector = ".word[data-src=\"" + word + "\"]";
+		var j = words.indexOf(word);
+		known[j] = level;
+		notes[j] = note;
 		$(selector).removeClass("known-0 known-1 known-2 known-3 known-4 known-5");
-		$(selector).addClass("word known-" + known[words.indexOf(w)]);
+		$(selector).addClass("word known-" + known[j]);
 	    }
 	});
 	$("#modal-word").modal("hide");

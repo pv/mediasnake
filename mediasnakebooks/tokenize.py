@@ -45,12 +45,19 @@ def _tokenize_jpn(paragraphs):
     html = []
     words = set()
 
+    def tohtml(x):
+        if x.base and x.base.isalpha():
+            base = x.base
+            if x.base_reading:
+                base += u"[" + x.base_reading + u"]"
+            return u"<span data-src=\"%s\">%s</span>" % (escape(_token_to_src(base)), escape(x.surface))
+        else:
+            return escape(x.surface)
+
     for para in paragraphs:
         parts = mecab.collapse(mecab.parse(para))
         words.update(x.base for x in parts if x.base)
-        p = [u"<span data-src=\"%s\">%s</span>" % (escape(_token_to_src(x.base)), escape(x.surface))
-             if x.base and x.base.isalpha() else escape(x.surface)
-             for x in parts]
+        p = [tohtml(x) for x in parts]
         html.append(u"<p>" + u"".join(p) + u"</p>")
 
     return list(words), u"\n".join(html)
