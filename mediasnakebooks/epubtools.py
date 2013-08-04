@@ -6,6 +6,8 @@ import bz2
 
 import epub
 
+from django.conf import settings
+
 from HTMLParser import HTMLParser
 from htmlentitydefs import name2codepoint
 
@@ -143,10 +145,23 @@ class TxtFile(BaseEpub):
         self.author = u""
         self.title = self._mangle_title(base)
 
-        for reg in TxtFile.FILE_RES:
+        dn0 = os.path.normpath(os.path.dirname(filename))
+        for root in settings.MEDIASNAKEFILES_DIRS:
+            dn = dn0
+            while dn.startswith(root + os.path.sep):
+                bdn = self._mangle_author(os.path.basename(dn))
+                if ',' in bdn:
+                    self.author = bdn
+                dn = os.path.dirname(dn)
+            if self.author:
+                break
+
+        for j, reg in enumerate(TxtFile.FILE_RES):
             m = reg.match(base)
             if m:
                 g = m.groupdict()
+                if j >= 2 and self.author and 'auth' in g:
+                    continue
                 if 'titl' in g:
                     self.title = self._mangle_title(g['titl'])
                 if 'auth' in g:
