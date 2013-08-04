@@ -19,7 +19,7 @@ from mediasnakebooks._stardict import Stardict
 
 @login_required
 def index(request):
-    books = Ebook.objects.order_by('author', 'title').all()
+    books = Ebook.objects.order_by('author', 'title').values('id', 'author', 'title')
     paginator = Paginator(books, 500)
 
     page = request.GET.get('page')
