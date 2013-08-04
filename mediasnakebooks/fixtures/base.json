@@ -3,14 +3,40 @@
     "pk": 1,
     "model": "mediasnakebooks.language",
     "fields": {
-        "code": "eng"
+        "code": "eng",
+        "dict_url": "http://en.wiktionary.org/wiki/@WORD@"
     }
   },
   {
     "pk": 2,
     "model": "mediasnakebooks.language",
     "fields": {
-        "code": "jpn"
+        "code": "jpn",
+        "dict_url": "http://jisho.org/words?dict=edict&jap=@WORD@"
+    }
+  },
+  {
+    "pk": 3,
+    "model": "mediasnakebooks.language",
+    "fields": {
+        "code": "deu",
+        "dict_url": "http://en.wiktionary.org/wiki/@WORD@"
+    }
+  },
+  {
+    "pk": 4,
+    "model": "mediasnakebooks.language",
+    "fields": {
+        "code": "swe",
+        "dict_url": "http://en.wiktionary.org/wiki/@WORD@"
+    }
+  },
+  {
+    "pk": 5,
+    "model": "mediasnakebooks.language",
+    "fields": {
+        "code": "fin",
+        "dict_url": "http://en.wiktionary.org/wiki/@WORD@"
     }
   }
 ]
