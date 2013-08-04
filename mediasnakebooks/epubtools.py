@@ -134,7 +134,7 @@ class TxtFile(BaseEpub):
         self._content = {}
 
         base, ext = os.path.splitext(os.path.basename(filename))
-        if ext in ('.gz', '.bz2'):
+        if ext in (u'.gz', u'.bz2'):
             base, ext = os.path.splitext(base)
 
         self.author = u""
