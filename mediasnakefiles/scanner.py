@@ -4,7 +4,6 @@ import logging
 import json
 import subprocess
 
-from django.db import transaction
 from django.conf import settings
 
 import django.utils.timezone
@@ -62,8 +61,7 @@ def _scan():
 
             # Process files
             for hook in SCAN_HOOKS:
-                with transaction.commit_on_success():
-                    hook(existing_files, mime_cache)
+                hook(existing_files, mime_cache)
 
             scan_message("Scan complete")
             set_scan_status(None)
