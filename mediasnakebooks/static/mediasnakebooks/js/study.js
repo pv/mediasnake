@@ -15,7 +15,12 @@ var study = (function() {
 
 	language = new_language;
 	dict_url = new_dict_url;
-	external_dict_url = new_external_dict_url;
+	if (new_external_dict_url == 'None') {
+	    external_dict_url = "";
+	}
+	else {
+	    external_dict_url = new_external_dict_url;
+	}
 	word_url = new_word_url;
 	words_url = new_words_url;
 
