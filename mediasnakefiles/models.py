@@ -74,6 +74,10 @@ class VideoFile(models.Model):
         return get_thumbnail_filename(self.thumbnail)
 
     def create_thumbnail(self):
+        thumbnail_filename = self.thumbnail_filename
+        if thumbnail_filename is not None and os.path.isfile(thumbnail_filename):
+            return False
+
         if not os.path.isfile(self.filename):
             raise RuntimeError("Not a file")
 
@@ -226,6 +230,7 @@ def _video_scanner(files):
         VideoFile.objects.get(filename=filename).delete()
 
     # Create thumbnails, if missing
+    scan_message("Processing video thumbnails...")
     objects = VideoFile.objects.all()
     for video_file in objects:
         if video_file.create_thumbnail():
