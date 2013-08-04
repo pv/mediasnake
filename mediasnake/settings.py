@@ -178,7 +178,17 @@ LOGGING = {
 }
 
 MEDIASNAKEFILES_ACCEPTED_FILE_TYPES = (
-    ("*", "video/*", None),
+    ("*.avi", "video/*", None),
+    ("*.webm", "video/*", None),
+    ("*.mkv", "video/*", None),
+    ("*.mpg", "video/*", None),
+    ("*.mpeg", "video/*", None),
+    ("*.mp4", "video/*", None),
+    ("*.mp2", "video/*", None),
+    ("*.ts", "video/*", None),
+    ("*.mov", "video/*", None),
+    ("*.flv", "video/*", None),
+    ("*.rm", "video/*", None),
     ("*.ogm", "application/ogg", "video/ogg"),
     ("*.ogv", "application/ogg", "video/ogg"),
 )
