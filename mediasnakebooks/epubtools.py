@@ -64,6 +64,7 @@ class BaseEpub(object):
             while j > 0:
                 if parts[j] and parts[j][0].isupper():
                     break
+                j -= 1
             forename = parts[:j]
             surname = parts[j:]
             if forename:
