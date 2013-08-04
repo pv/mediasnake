@@ -47,10 +47,13 @@ def _scan():
 
             with transaction.commit_on_success():
                 for root in settings.MEDIASNAKEFILES_DIRS:
-                    for path, dirs, files in os.walk(root):
+                    for path, dirs, files in os.walk(root, topdown=True):
                         msg = "Scanning directory: '%s'" % os.path.join(root, path)
                         logger.info(msg)
                         set_scan_status(msg)
+
+                        dirs.sort()
+                        files.sort()
 
                         # Insert new files
                         for basename in files:
