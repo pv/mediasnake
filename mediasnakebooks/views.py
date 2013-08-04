@@ -12,7 +12,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
 from mediasnakebooks.models import Ebook, Word, Language
-from mediasnakebooks.epubtools import Epub
+from mediasnakebooks.epubtools import open_epub
 from mediasnakebooks.tokenize import tokenize
 from mediasnakebooks._stardict import Stardict
 
@@ -29,7 +29,7 @@ def _get_epub(id, pos):
     except Ebook.DoesNotExist:
         raise Http404
 
-    epub = Epub(ebook.filename)
+    epub = open_epub(ebook.filename)
     chapters = epub.chapters()
 
     try:

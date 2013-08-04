@@ -3,7 +3,7 @@ import os
 from django.db import models
 
 from mediasnakefiles.scanner import register_file_scanner, register_post_scanner, scan_message
-from mediasnakebooks.epubtools import Epub
+from mediasnakebooks.epubtools import open_epub
 
 UNKNOWN = 5
 WELL_KNOWN = 1
@@ -39,7 +39,12 @@ class Ebook(models.Model):
 
 @register_file_scanner
 def _book_scan(filename, mimetype):
-    if mimetype not in ("application/epub+zip",):
+    ok = (mimetype in ("application/epub+zip",)
+          or filename.endswith('.epub')
+          or filename.endswith('.txt')
+          or filename.endswith('.txt.gz')
+          or filename.endswith('.txt.bz2'))
+    if not ok:
         return False
 
     try:
@@ -52,7 +57,7 @@ def _book_scan(filename, mimetype):
     author = None
 
     try:
-        pub = Epub(filename)
+        pub = open_epub(filename)
 
         try:
             title = pub.title
