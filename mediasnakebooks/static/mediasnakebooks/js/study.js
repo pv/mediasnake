@@ -91,11 +91,14 @@ var study = (function() {
 	$("#modal-word-dict").text("<Loading dictionary...>");
 
 	dictLookup(word, function(data) {
-	    if (!data['error']) {
-		$("#modal-word-dict").text(data["text"]);
-	    }
-	    else {
-		$("#modal-word-dict").text("Dictionary lookup failed: " + data["text"]);
+	    base_word = $("#modal-word-word").attr("value").replace(/\[.*\]/, "");
+	    if (data['word'] == base_word) {
+		if (!data['error']) {
+		    $("#modal-word-dict").text(data["text"]);
+		}
+		else {
+		    $("#modal-word-dict").text("Dictionary lookup failed: " + data["text"]);
+		}
 	    }
 	});
 

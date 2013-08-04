@@ -122,7 +122,7 @@ def word_dict(request, language, word):
         except IOError:
             text = u"<Stardict dictionary file not found!>"
 
-    content = json.dumps(dict(text=text, error=error))
+    content = json.dumps(dict(word=word, text=text, error=error))
     return HttpResponse(content, content_type="application/json")
 
 
