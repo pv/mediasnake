@@ -1,7 +1,6 @@
 import os
 import re
 import struct
-import ctypes
 import subprocess
 import tempfile
 import bisect
@@ -13,7 +12,7 @@ class Stardict(object):
     Parameters
     ----------
     basename : str
-        Basename for files. Will produce files basename.ifo/.idx/.dict/.dict.dz
+        Basename for files. Will use files basename.idx/.dict/.dict.dz
 
     Methods
     -------

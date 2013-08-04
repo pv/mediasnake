@@ -24,7 +24,8 @@ class Language(models.Model):
 
 class Word(models.Model):
     language = models.ForeignKey(Language, null=False)
-    base_form = models.CharField(max_length=128, null=False, help_text="Base form of the word")
+    base_form = models.CharField(max_length=128, null=False, help_text="Base form of the word",
+                                 db_index=True)
 
     notes = models.TextField(null=True, blank=True)
     known = models.IntegerField(default=5, null=False, blank=False,
@@ -39,8 +40,11 @@ class Word(models.Model):
 
 class Ebook(models.Model):
     filename = models.TextField(null=False)
-    title = models.TextField()
-    author = models.TextField()
+    title = models.CharField(max_length=128)
+    author = models.CharField(max_length=128)
+
+    class Meta:
+        index_together = (('author', 'title'),)
 
 
 @register_scanner
@@ -64,8 +68,8 @@ def _book_scan(existing_files, mime_cache):
 
         try:
             pub = open_epub(filename)
-            title = pub.title
-            author = pub.author
+            title = pub.title[:128]
+            author = pub.author[:128]
         except:
             # Failed to parse
             scan_message("Failed to open Epub file %r" % (filename,))
