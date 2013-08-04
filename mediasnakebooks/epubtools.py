@@ -92,8 +92,10 @@ class Epub(BaseEpub):
     @property
     def author(self):
         try:
-            return u"\n".join(self._mangle_author(x[0]) for x in self.pub.opf.metadata.creators
-                              if x[1] == u'aut')
+            authors = [x[0] for x in self.pub.opf.metadata.creators if x[1] == u'aut']
+            if not authors:
+                authors = [x[0] for x in self.pub.opf.metadata.creators]
+            return u"\n".join(self._mangle_author(x) for x in authors)
         except (IndexError, AttributeError):
             return u""
 
