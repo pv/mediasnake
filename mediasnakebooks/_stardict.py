@@ -4,7 +4,7 @@ import struct
 import ctypes
 import subprocess
 import tempfile
-import numpy as np
+import bisect
 
 class Stardict(object):
     """
@@ -32,7 +32,7 @@ class Stardict(object):
         self.dict_dz_file = basename + ".dict.dz"
 
         self.dict_file_obj = None
-        self.index = {}
+        self.index = []
 
         self._read_index()
 
@@ -55,41 +55,25 @@ class Stardict(object):
             self.dict_file_obj = open(self.dict_file, 'rb')
 
         with open(self.idx_file, 'rb') as idx:
-            keys_b = []
-            offsets_b = []
-            sizes_b = []
-
-            key_re = re.compile("([^\0]+)\0(....)(....)", re.S)
-
-            for key_b, offset_b, size_b in key_re.findall(idx.read()):
-                keys_b.append(key_b)
-                offsets_b.append(offset_b)
-                sizes_b.append(size_b)
-
-            self.keys = "\0".join(keys_b).decode('utf-8').split(u"\0")
-
-            offsets_b = "".join(offsets_b)
-            self.offsets = np.fromstring(offsets_b, '>u4') # struct.unpack("!%dI" % (len(offsets_b)//4,), offsets_b)
-
-            sizes_b = "".join(sizes_b)
-            self.sizes = np.fromstring(sizes_b, '>u4') # struct.unpack("!%dI" % (len(sizes_b)//4,), sizes_b)
+            key_re = re.compile("([^\0]+)\0(........)", re.S)
+            self.index = key_re.findall(idx.read())
+            self.index.sort()
 
     def lookup(self, key):
-        try:
-            j1 = self.keys.index(key)
-        except (IndexError, ValueError):
-            return []
-
-        j2 = j1
-        while j2 < len(self.keys) and self.keys[j2] == self.keys[j1]:
-            j2 += 1
+        if isinstance(key, unicode):
+            key = key.encode('utf-8')
 
         items = []
-        for j in range(j1, j2):
-            offset = self.offsets[j]
-            size = self.sizes[j]
 
+        j0 = bisect.bisect_left(self.index, (key, ""))
+        for j in range(j0, len(self.index)):
+            k, data = self.index[j]
+            if k != key:
+                break
+
+            offset, size = struct.unpack("!2I", data)
             self.dict_file_obj.seek(offset)
             items.append(self.dict_file_obj.read(size).decode('utf-8'))
+            j += 1
 
         return items
