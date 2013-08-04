@@ -48,7 +48,7 @@ def _tokenize_jpn(paragraphs):
     def tohtml(x):
         if x.base and x.base.isalpha():
             base = x.base
-            if x.base_reading:
+            if x.base_reading and x.base_reading != x.base:
                 base += u"[" + x.base_reading + u"]"
             return u"<span data-src=\"%s\">%s</span>" % (escape(_token_to_src(base)), escape(x.surface))
         else:
