@@ -198,34 +198,36 @@ def _streaming_ticket_cleanup_symlink(sender, instance, using, **kwargs):
 
 
 @register_scanner
-def _video_scanner(files):
-    video_files = set()
+def _video_scanner(existing_files, mime_cache):
+    files_in_db = set(VideoFile.objects.values_list('filename', flat=True))
+    to_add = existing_files.difference(files_in_db)
+    to_remove = files_in_db.difference(existing_files)
 
-    for filename, mimetype in files.iteritems():
+    # Add files not yet in DB
+    scan_message("Adding videos...")
+    for filename in to_add:
         basename = os.path.basename(filename)
 
         # Check that the extension and mime type
         # are indicative of a video file
         for file_pattern, mime_pattern, replacement_mimetype in \
                 settings.MEDIASNAKEFILES_ACCEPTED_FILE_TYPES:
-            if (fnmatch.fnmatch(mimetype, mime_pattern) and
-                fnmatch.fnmatch(basename, file_pattern)):
+            if (fnmatch.fnmatch(basename, file_pattern) and
+                fnmatch.fnmatch(mime_cache.get(filename), mime_pattern)):
                 if replacement_mimetype is not None:
                     mimetype = replacement_mimetype
-                video_files.add(filename)
+                else:
+                    mimetype = mime_cache.get(filename)
+                break
+        else:
+            continue
 
-    files_in_db = set(VideoFile.objects.values_list('filename', flat=True))
-
-    # Add files not yet in DB
-    to_add = video_files.difference(files_in_db)
-    for filename in to_add:
         scan_message("Adding video: %r" % (filename,))
-        video_file = VideoFile(filename=filename, mimetype=files[filename])
+        video_file = VideoFile(filename=filename, mimetype=mimetype)
         video_file.save()
 
     # Remove non-existent entries
     scan_message("Cleaning up non-existing videos...")
-    to_remove = files_in_db.difference(video_files)
     for filename in to_remove:
         VideoFile.objects.get(filename=filename).delete()
 

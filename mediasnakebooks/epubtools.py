@@ -89,13 +89,19 @@ class Epub(BaseEpub):
 
     @property
     def author(self):
-        return u"\n".join(self._mangle_author(x[0]) for x in self.pub.opf.metadata.creators
-                          if x[1] == u'aut')
+        try:
+            return u"\n".join(self._mangle_author(x[0]) for x in self.pub.opf.metadata.creators
+                              if x[1] == u'aut')
+        except (IndexError, AttributeError):
+            return u""
 
     @property
     def title(self):
-        return u"\n".join(self._mangle_title(x[0])
-                          for x in self.pub.opf.metadata.titles)
+        try:
+            return u"\n".join(self._mangle_title(x[0])
+                              for x in self.pub.opf.metadata.titles)
+        except (IndexError, AttributeError):
+            return u""
 
     def get(self, item):
         html = self.pub.read_item(self.pub.get_item(item))

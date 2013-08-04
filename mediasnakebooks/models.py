@@ -38,43 +38,32 @@ class Ebook(models.Model):
 
 
 @register_scanner
-def _book_scan(files):
-    book_files = set()
+def _book_scan(existing_files, mime_cache):
+    files_in_db = set(Ebook.objects.values_list('filename', flat=True))
+    to_add = existing_files.difference(files_in_db)
+    to_remove = files_in_db.difference(existing_files)
 
-    for filename, mimetype in files.iteritems():
-        ok = (mimetype in ("application/epub+zip",)
-              or filename.endswith('.epub')
+    # Add files not yet in DB
+    scan_message("Adding books...")
+    for filename in to_add:
+        ok = (filename.endswith('.epub')
               or filename.endswith('.txt')
               or filename.endswith('.txt.gz')
               or filename.endswith('.txt.bz2'))
-        if ok:
-            book_files.add(filename)
+        if not ok:
+            continue
 
-
-    files_in_db = set(Ebook.objects.values_list('filename', flat=True))
-
-    # Add files not yet in DB
-    to_add = book_files.difference(files_in_db)
-    for filename in to_add:
         title = os.path.splitext(os.path.basename(filename))[0]
         author = None
 
         try:
             pub = open_epub(filename)
-
-            try:
-                title = pub.title
-            except (IndexError, AttributeError):
-                pass
-
-            try:
-                author = pub.author
-            except (IndexError, AttributeError):
-                pass
+            title = pub.title
+            author = pub.author
         except:
             # Failed to parse
             scan_message("Failed to open Epub file %r" % (filename,))
-            return False
+            continue
 
         scan_message("Adding book: %r" % (filename,))
 
@@ -83,6 +72,5 @@ def _book_scan(files):
 
     # Remove non-existent entries
     scan_message("Cleaning up non-existing books...")
-    to_remove = files_in_db.difference(book_files)
     for filename in to_remove:
         Ebook.objects.get(filename=filename).delete()

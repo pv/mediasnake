@@ -37,7 +37,8 @@ def scan():
 def _scan():
     try:
         with LockFile(SCAN_LOCKFILE, fail_if_active=True):
-            existing_files = {}
+            existing_files = set()
+            mime_cache = MimeCache()
 
             # Scan for all files (batch operations are faster)
             for root in settings.MEDIASNAKEFILES_DIRS:
@@ -52,13 +53,12 @@ def _scan():
                     # Insert new files
                     for basename in files:
                         filename = os.path.normpath(os.path.join(root, path, basename))
-                        mimetype = get_mime_type(filename)
-                        existing_files[filename] = mimetype
+                        existing_files.add(filename)
 
             # Process files
             for hook in SCAN_HOOKS:
                 with transaction.commit_on_success():
-                    hook(existing_files)
+                    hook(existing_files, mime_cache)
 
             scan_message("Scan complete")
             set_scan_status(None)
@@ -120,3 +120,15 @@ def spawn_rescan():
     subprocess.Popen([python, manage_py, 'rescan'],
                      stdin=devnull_r, stdout=devnull_w, stderr=devnull_r,
                      cwd=base_dir, close_fds=True)
+
+
+class MimeCache(object):
+    def __init__(self):
+        self._cache = {}
+
+    def get(self, filename):
+        mimetype = self._cache.get(filename)
+        if mimetype is None:
+            mimetype = get_mime_type(filename)
+            self._cache[mimetype] = mimetype
+        return mimetype
