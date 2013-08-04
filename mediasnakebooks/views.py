@@ -21,7 +21,7 @@ from mediasnakebooks._stardict import Stardict
 @cache_page(30*24*60*60)
 def index(request):
     books = Ebook.objects.order_by('author', 'title').values('id', 'author', 'title')
-    paginator = Paginator(books, 500)
+    paginator = Paginator(books, 50)
 
     page = request.GET.get('page')
     try:
@@ -33,7 +33,7 @@ def index(request):
         # If page is out of range (e.g. 9999), deliver last page of results.
         books = paginator.page(paginator.num_pages)
 
-    context = {'books': books}
+    context = {'books': books, 'pages': range(1, paginator.num_pages+1)}
     return render(request, "mediasnakebooks/index.html", context)
 
 
