@@ -18,6 +18,7 @@ from mediasnakebooks.tokenize import tokenize
 from mediasnakebooks._stardict import Stardict
 
 @login_required
+@cache_page(30*24*60*60)
 def index(request):
     books = Ebook.objects.order_by('author', 'title').values('id', 'author', 'title')
     paginator = Paginator(books, 500)
@@ -57,6 +58,7 @@ def _get_epub(id, pos):
 
 
 @login_required
+@cache_page(30*24*60*60)
 def ebook(request, id, pos):
     ebook, epub, chapters, paragraphs, pos = _get_epub(id, pos)
 
@@ -77,7 +79,6 @@ def ebook(request, id, pos):
 
 
 @login_required
-@cache_control(private=True, max_age=30*60)
 @cache_page(30*24*60*60)
 def tokens(request, id, pos, language):
     ebook, epub, chapters, paragraphs, pos = _get_epub(id, pos)
