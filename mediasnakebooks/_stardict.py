@@ -5,6 +5,9 @@ import subprocess
 import tempfile
 import bisect
 
+_INDEX_CACHE = {}
+_INDEX_CACHE_SIZE = 2
+
 class Stardict(object):
     """
     Read dictionary files in StarDict format.
@@ -53,10 +56,20 @@ class Stardict(object):
         if self.dict_file_obj is None:
             self.dict_file_obj = open(self.dict_file, 'rb')
 
+        try:
+            self.index = _INDEX_CACHE[self.idx_file]
+            return
+        except KeyError:
+            pass
+
         with open(self.idx_file, 'rb') as idx:
             key_re = re.compile("([^\0]+)\0(........)", re.S)
             self.index = key_re.findall(idx.read())
             self.index.sort()
+
+        if len(_INDEX_CACHE) > _INDEX_CACHE_SIZE:
+            _INDEX_CACHE.clear()
+        _INDEX_CACHE[self.idx_file] = self.index
 
     def lookup(self, key):
         if isinstance(key, unicode):
