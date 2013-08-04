@@ -38,7 +38,8 @@ var study = (function() {
     };
 
     var dictLookup = function(word, callback) {
-	$.get(dict_url.replace('@WORD@', word), callback);
+	base_word = word.replace(/\[.*\]/, "");
+	$.get(dict_url.replace('@WORD@', base_word), callback);
     }
 
     var updateWordKnowledge = function() {
@@ -68,7 +69,8 @@ var study = (function() {
 
 	if (external_dict_url) {
 	    var url;
-	    url = external_dict_url.replace('@WORD@', word).replace('@word@', word);
+	    base_word = word.replace(/\[.*\]/, "");
+	    url = external_dict_url.replace('@WORD@', base_word).replace('@word@', base_word);
 	    $("#modal-word-external-dict").attr('href', url);
 	    $("#modal-word-external-dict").removeClass('hide');
 	}
