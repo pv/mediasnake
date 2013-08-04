@@ -117,6 +117,8 @@ class TxtFile(BaseEpub):
     FILE_RES = [
         re.compile(r"^(?P<auth>[^-\[\]]+) - (?P<titl>[^\[\]]+) \[(?P<lang>.*)\]$"),
         re.compile(r"^(?P<auth>[^-]+) - (?P<titl>.+)$"),
+        re.compile(r"^(?P<auth>[^-\[\]]+)\s*-\s*(?P<titl>[^\[\]]+) \[(?P<lang>.*)\]$"),
+        re.compile(r"^(?P<auth>[^-]+)\s*-\s*(?P<titl>.+)$"),
         re.compile(r"^(?P<titl>[^\[\]]+) \[(?P<lang>.+)\]$"),
         re.compile(r"^(?P<titl>.+)$")
     ]
