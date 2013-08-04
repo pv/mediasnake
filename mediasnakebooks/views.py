@@ -177,3 +177,39 @@ def word_adjust(request, language, word):
 
     content = json.dumps(dict(error=False))
     return HttpResponse(content, content_type="application/json")
+
+
+@login_required
+def words_export(request, language):
+    try:
+        lang = Language.objects.get(code=language)
+    except Language.DoesNotExist:
+        raise Http404
+
+    words = Word.objects.filter(language=lang).all()
+
+    rows = []
+    for w in words:
+        if w.known in (0, 5):
+            continue
+
+        m = re.match(ur'^(.*?)\s*\[(.*)\]\s*$', w.base_form)
+        if m:
+            base_form = m.group(1)
+            alt_form = m.group(2)
+        else:
+            base_form = w.base_form
+            alt_form = u""
+
+        notes = w.notes
+        if notes:
+            notes = notes.replace(u"\n", u" ").replace(u"\t", u" ").strip()
+        else:
+            notes = u""
+
+        rows.append(u"\t".join(
+            [base_form, alt_form, unicode(w.known), notes]))
+
+    response = HttpResponse(u"\n".join(rows), content_type="text/csv")
+    response['Content-Disposition'] = "attachment; filename=\"words-%s.csv\"" % (lang.code)
+    return response

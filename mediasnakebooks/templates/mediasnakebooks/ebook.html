@@ -57,9 +57,11 @@
               data-external-dict-url="{{ lang.dict_url }}"
               data-word-url="{% url 'ebook-ajax-word' lang.code '@WORD@' %}"
               data-words-url="{% url 'ebook-ajax-words' lang.code %}"
+              data-words-export-url="{% url 'ebook-ajax-words-export' lang.code %}"
 	      >{{ lang.code }}</option>
       {% endfor %}
     </select>
+    <a class="btn btn-link hide" id="download-words" href="#">Download words</a>
     {% if next %}
     <a class="btn pull-right" href="{% url 'ebook-pos' ebook.id next %}">Next</a>
     {% endif %}
@@ -90,6 +92,7 @@ $("#language-select").change(function() {
     var dict_url = "";
     var external_dict_url = "";
     var word_url = "";
+    var words_export_url = "";
     $("#language-select option:selected").each(function () {
         lang = $(this).attr("value");
         token_url = $(this).attr("data-token-url");
@@ -97,8 +100,18 @@ $("#language-select").change(function() {
         external_dict_url = $(this).attr("data-external-dict-url");
         word_url = $(this).attr("data-word-url");
         words_url = $(this).attr("data-words-url");
+        words_export_url = $(this).attr("data-words-export-url");
     });
     study.init(lang, token_url, dict_url, external_dict_url, word_url, words_url);
+
+    if (lang) {
+        $("#download-words").attr("href", words_export_url);
+        $("#download-words").removeClass("hide");
+    }
+    else {
+        $("#download-words").attr("href", "#");
+        $("#download-words").addClass("hide");
+    }
 });
 
 $("#chapter-select").change(function() {

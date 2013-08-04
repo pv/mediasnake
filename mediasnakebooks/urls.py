@@ -9,4 +9,5 @@ urlpatterns = patterns('',
     url(r'^ajax/dict/(?P<language>[A-Za-z0-9@-]+)/(?P<word>.*)/$', views.word_dict, name='ebook-ajax-dict'),
     url(r'^ajax/word/(?P<language>[A-Za-z0-9@-]+)/(?P<word>.*)/$', views.word_adjust, name='ebook-ajax-word'),
     url(r'^ajax/words/(?P<language>[A-Za-z0-9@-]+)/$', views.words, name='ebook-ajax-words'),
+    url(r'^words/(?P<language>[A-Za-z0-9@-]+)/$', views.words_export, name='ebook-ajax-words-export'),
 )
