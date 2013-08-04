@@ -229,7 +229,7 @@ def _video_scanner(existing_files, mime_cache):
     # Remove non-existent entries
     scan_message("Cleaning up non-existing videos...")
     for filename in to_remove:
-        VideoFile.objects.get(filename=filename).delete()
+        VideoFile.objects.filter(filename=filename).delete()
 
     # Create thumbnails, if missing
     scan_message("Processing video thumbnails...")

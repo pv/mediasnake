@@ -73,4 +73,4 @@ def _book_scan(existing_files, mime_cache):
     # Remove non-existent entries
     scan_message("Cleaning up non-existing books...")
     for filename in to_remove:
-        Ebook.objects.get(filename=filename).delete()
+        Ebook.objects.filter(filename=filename).delete()
