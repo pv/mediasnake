@@ -58,7 +58,7 @@ def _tokenize_jpn(paragraphs):
         parts = mecab.collapse(mecab.parse(para))
         words.update(x.base + u"[" + x.base_reading + u"]" 
                      if x.base_reading and x.base_reading != x.base else x.base
-                     for x in parts if x.base)
+                     for x in parts if x.base and x.base.isalpha())
         p = [tohtml(x) for x in parts]
         html.append((u"<p data-line=\"%d\">" % j) + u"".join(p) + u"</p>")
 
