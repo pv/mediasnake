@@ -4,46 +4,37 @@
 
 {% block content %}
 <h1>Recently read</h1>
-<table class="booklist">
-  {% for r in recent %}
-  <tr>
-    <td><a href="{% url 'ebook-start' r.ebook.id %}">{{ r.ebook.title }}</a></td>
-    <td>{{ r.ebook.author }}</td>
-  </tr>
-  {% endfor %}
-</table>
-<a class="btn btn-link" href="{% url 'ebook-recent' %}">More...</a>
 
-<h1>Books</h1>
 <div class="controls">
-  {% if books.has_previous %}
-  <a class="btn" href="?page={{ books.previous_page_number }}">Prev</a>
+  {% if recent.has_previous %}
+  <a class="btn" href="?page={{ recent.previous_page_number }}">Prev</a>
   {% endif %}
   
   <select id="page-select">
     {% for page in pages %}
-    <option value="{{ page }}" {% if page == books.number %}selected{% endif %}>Page {{ page }}</option>
+    <option value="{{ page }}" {% if page == recent.number %}selected{% endif %}>Page {{ page }}</option>
     {% endfor %}
   </select>
   
-  {% if books.has_next %}
-  <a class="btn" href="?page={{ books.next_page_number }}">Next</a>
+  {% if recent.has_next %}
+  <a class="btn" href="?page={{ recent.next_page_number }}">Next</a>
   {% endif %}
 
   <span class="search">
     <form action="" method="GET">
       <input class="text" type="text" name="search" value="{{ search_str }}">
-      <input type="hidden" name="page" value="{{ books.number }}">
+      <input type="hidden" name="page" value="{{ recent.number }}">
       <input class="btn" type="Submit" value="Search">
     </form>
   </span>
 </div>
 
 <table class="booklist">
-  {% for book in books %}
+  {% for r in recent %}
   <tr>
-    <td><a href="{% url 'ebook-start' book.id %}">{{ book.title }}</a></td>
-    <td>{{ book.author }}</td>
+    <td><a href="{% url 'ebook-start' r.ebook.id %}">{{ r.ebook.title }}</a></td>
+    <td>{{ r.ebook.author }}</td>
+    <td>{{ r.timestamp.date }}</td>
   </tr>
   {% endfor %}
 </table>

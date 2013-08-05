@@ -52,6 +52,34 @@ def index(request):
     return render(request, "mediasnakebooks/index.html", context)
 
 
+@login_required
+def recent(request):
+    query = Bookmark.objects
+
+    search_str = request.GET.get('search')
+    if search_str:
+        query = query.filter(Q(ebook__author__icontains=search_str) | Q(ebook__title__icontains=search_str))
+    else:
+        search_str = u''
+
+    recent = query.all()
+    paginator = Paginator(recent, 50)
+
+    page = request.GET.get('page')
+    try:
+        recent = paginator.page(page)
+    except PageNotAnInteger:
+        recent = paginator.page(1)
+    except EmptyPage:
+        recent = paginator.page(paginator.num_pages)
+
+    context = {'recent': recent,
+               'pages': range(1, paginator.num_pages+1),
+               'search_str': search_str,
+               }
+    return render(request, "mediasnakebooks/recent.html", context)
+
+
 def _get_epub(id, chapter):
     try:
         ebook = Ebook.objects.get(pk=id)

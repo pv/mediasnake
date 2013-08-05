@@ -12,4 +12,5 @@ urlpatterns = patterns('',
     url(r'^ajax/words/(?P<language>[A-Za-z0-9@-]+)/$', views.words, name='ebook-ajax-words'),
     url(r'^ajax/bookmark/(?P<id>\d+)/(?P<chapter>[A-Z0-9@]+)/$', views.bookmark, name='ebook-ajax-bookmark'),
     url(r'^words/(?P<language>[A-Za-z0-9@-]+)/$', views.words_export, name='ebook-ajax-words-export'),
+    url(r'^recent/$', views.recent, name='ebook-recent'),
 )
