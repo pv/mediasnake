@@ -13,10 +13,11 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-from mediasnakebooks.models import Ebook, Word, Language
+from mediasnakebooks.models import Ebook, Word, Language, Bookmark
 from mediasnakebooks.epubtools import open_epub
 from mediasnakebooks.tokenize import tokenize
 from mediasnakebooks._stardict import Stardict
+
 
 @login_required
 def index(request):
@@ -41,13 +42,17 @@ def index(request):
         # If page is out of range (e.g. 9999), deliver last page of results.
         books = paginator.page(paginator.num_pages)
 
+    recent = Bookmark.objects.all()[:5]
+
     context = {'books': books,
                'pages': range(1, paginator.num_pages+1),
-               'search_str': search_str}
+               'search_str': search_str,
+               'recent': recent,
+               }
     return render(request, "mediasnakebooks/index.html", context)
 
 
-def _get_epub(id, pos):
+def _get_epub(id, chapter):
     try:
         ebook = Ebook.objects.get(pk=id)
     except Ebook.DoesNotExist:
@@ -57,20 +62,20 @@ def _get_epub(id, pos):
     chapters = epub.chapters()
 
     try:
-        pos = int(pos)
-        chapter = chapters[pos]
+        chapter = int(chapter)
+        chapter_name = chapters[chapter]
     except (IndexError, ValueError):
         raise Http404
 
-    paragraphs = epub.get(chapter)
+    paragraphs = epub.get(chapter_name)
 
-    return ebook, epub, chapters, paragraphs, pos
+    return ebook, epub, chapters, paragraphs, chapter
 
 
 @login_required
 @cache_page(30*24*60*60)
-def ebook(request, id, pos):
-    ebook, epub, chapters, paragraphs, pos = _get_epub(id, pos)
+def ebook(request, id, chapter):
+    ebook, epub, chapters, paragraphs, chapter = _get_epub(id, chapter)
 
     languages = [dict(code=lang.code, dict_url=lang.dict_url)
                  for lang in Language.objects.order_by('code').all()]
@@ -79,19 +84,75 @@ def ebook(request, id, pos):
         'ebook': ebook,
         'paragraphs': paragraphs,
         'chapters': chapters,
-        'pos': pos,
-        'next': pos + 1 if pos + 1 < len(chapters) else None,
-        'prev': pos - 1 if pos > 0 else None,
+        'chapter': chapter,
+        'next': chapter + 1 if chapter + 1 < len(chapters) else None,
+        'prev': chapter - 1 if chapter > 0 else None,
         'languages': languages,
         }
+
+    try:
+        bookmark = Bookmark.objects.get(ebook=ebook)
+    except Bookmark.DoesNotExist:
+        if chapter != 0:
+            bookmark = Bookmark(ebook=ebook)
+            bookmark.chapter = 0
+            bookmark.paragraph = 0
+            bookmark.save()
 
     return render(request, "mediasnakebooks/ebook.html", context)
 
 
 @login_required
+def ebook_start(request, id):
+    try:
+        ebook = Ebook.objects.get(pk=id)
+    except Ebook.DoesNotExist:
+        raise Http404
+
+    try:
+        bookmark = Bookmark.objects.get(ebook=ebook)
+        chapter = bookmark.chapter
+    except Bookmark.DoesNotExist:
+        chapter = 0
+
+    return redirect('ebook-chapter', id, chapter)
+
+
+@login_required
+def bookmark(request, id, chapter):
+    try:
+        ebook = Ebook.objects.get(pk=id)
+    except Ebook.DoesNotExist:
+        raise Http404
+
+    if request.method == 'POST':
+        try:
+            paragraph = int(request.POST['paragraph'])
+        except (ValueError, KeyError):
+            return HttpResponse("400 Bad request", status=400)
+
+        try:
+            bookmark = Bookmark.objects.get(ebook=ebook)
+        except Bookmark.DoesNotExist:
+            bookmark = Bookmark(ebook=ebook)
+
+        bookmark.chapter = chapter
+        bookmark.paragraph = paragraph
+        bookmark.save()
+    else:
+        try:
+            bookmark = Bookmark.objects.get(ebook=ebook, chapter=chapter)
+        except Bookmark.DoesNotExist:
+            raise Http404
+
+    content = json.dumps(dict(paragraph=bookmark.paragraph, error=False))
+    return HttpResponse(content, content_type="application/json")
+
+
+@login_required
 @cache_page(30*24*60*60)
-def tokens(request, id, pos, language):
-    ebook, epub, chapters, paragraphs, pos = _get_epub(id, pos)
+def tokens(request, id, chapter, language):
+    ebook, epub, chapters, paragraphs, chapter = _get_epub(id, chapter)
     words, html = tokenize(paragraphs, language)
 
     html = re.sub(u' </span>', u'</span> ', html)

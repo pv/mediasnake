@@ -39,12 +39,12 @@
 <div class='ebook'>
   <div class='controls'>
     {% if prev >= 0 %}
-    <a class="btn" href="{% url 'ebook-pos' ebook.id prev %}">Prev</a>
+    <a class="btn" href="{% url 'ebook-chapter' ebook.id prev %}">Prev</a>
     {% endif %}
     <select id="chapter-select">
       <option value="" selected>Jump to chapter</option>
       {% for chapter in chapters %}
-      <option value="{{ forloop.counter0 }}" {% if forloop.counter0 == pos %}selected{% endif %}>{{ forloop.counter }}</option>
+      <option value="{{ forloop.counter0 }}" {% if forloop.counter0 == chapter %}selected{% endif %}>{{ forloop.counter }}</option>
       {% endfor %}
     </select>
     <select id="language-select">
@@ -52,7 +52,7 @@
       {% for lang in languages %}
       <option class="study-lang" 
               value="{{ lang.code }}" 
-              data-token-url="{% url 'ebook-ajax-tokens' ebook.id pos lang.code %}"
+              data-token-url="{% url 'ebook-ajax-tokens' ebook.id chapter lang.code %}"
               data-dict-url="{% url 'ebook-ajax-dict' lang.code '@WORD@' %}"
               data-external-dict-url="{{ lang.dict_url }}"
               data-word-url="{% url 'ebook-ajax-word' lang.code '@WORD@' %}"
@@ -63,20 +63,20 @@
     </select>
     <a class="btn btn-link hide" id="download-words" href="#">Download words</a>
     {% if next %}
-    <a class="btn pull-right" href="{% url 'ebook-pos' ebook.id next %}">Next</a>
+    <a class="btn pull-right" href="{% url 'ebook-chapter' ebook.id next %}">Next</a>
     {% endif %}
   </div>
   <div class="ebook-text" id="ebook-text">
     {% for p in paragraphs %}
-    <p>{{ p }}</p>
+    <p data-line="{{ forloop.counter0 }}">{{ p }}</p>
     {% endfor %}
   </div>
   <div class='controls'>
     {% if prev %}
-    <a class="btn" href="{% url 'ebook-pos' ebook.id prev %}">Prev</a>
+    <a class="btn" href="{% url 'ebook-chapter' ebook.id prev %}">Prev</a>
     {% endif %}
     {% if next %}
-    <a class="btn pull-right" href="{% url 'ebook-pos' ebook.id next %}">Next</a>
+    <a class="btn pull-right" href="{% url 'ebook-chapter' ebook.id next %}">Next</a>
     {% endif %}
   </div>
 </div>
@@ -84,7 +84,9 @@
 
 
 {% block extra_js %}
+<script type="text/javascript" src="{{ STATIC_URL }}mediasnakebooks/js/django-ajax.js?version={{ MEDIASNAKE_VERSION }}"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}mediasnakebooks/js/study.js?version={{ MEDIASNAKE_VERSION }}"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}mediasnakebooks/js/bookmark.js?version={{ MEDIASNAKE_VERSION }}"></script>
 <script>
 $("#language-select").change(function() {
     var lang = "";
@@ -120,8 +122,12 @@ $("#chapter-select").change(function() {
         dest = $(this).attr("value");
     });
     if (dest != "") {
-        window.location = "{% url 'ebook-pos' ebook.id '@VALUE@' %}".replace("@VALUE@", dest);
+        window.location = "{% url 'ebook-chapter' ebook.id '@VALUE@' %}".replace("@VALUE@", dest);
     }
+});
+
+$(document).ready(function() {
+    bookmark.init("{% url 'ebook-ajax-bookmark' ebook.id chapter %}");
 });
 </script>
 {% endblock %}

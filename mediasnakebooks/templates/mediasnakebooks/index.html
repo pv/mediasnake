@@ -3,6 +3,17 @@
 {% block title %}Books{% endblock %}
 
 {% block content %}
+<h1>Recently read</h1>
+<table>
+  {% for r in recent %}
+  <tr>
+    <td><a href="{% url 'ebook-start' r.ebook.id %}">{{ r.ebook.title }}</a></td>
+    <td>{{ r.ebook.author }}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+<h1>Books</h1>
 <div class="controls">
   {% if books.has_previous %}
   <a class="btn" href="?page={{ books.previous_page_number }}">Prev</a>
@@ -10,7 +21,7 @@
   
   <select id="page-select">
     {% for page in pages %}
-    <option value="{{ page }}" {% if page == books.number %}selected{% endif %}>{{ page }}</option>
+    <option value="{{ page }}" {% if page == books.number %}selected{% endif %}>Page {{ page }}</option>
     {% endfor %}
   </select>
   
@@ -28,13 +39,9 @@
 </div>
 
 <table>
-  <tr>
-    <th>Title</th>
-    <th>Author</th>
-  </tr>
   {% for book in books %}
   <tr>
-    <td><a href="{% url 'ebook-pos' book.id 0 %}">{{ book.title }}</a></td>
+    <td><a href="{% url 'ebook-start' book.id %}">{{ book.title }}</a></td>
     <td>{{ book.author }}</td>
   </tr>
   {% endfor %}

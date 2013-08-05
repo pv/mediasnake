@@ -23,7 +23,7 @@ def _tokenize_eng(paragraphs):
     html = []
     words = set()
 
-    for para in paragraphs:
+    for j, para in enumerate(paragraphs):
         para = para.replace(u"\u2019", u"'")
 
         p = para.split()
@@ -34,7 +34,7 @@ def _tokenize_eng(paragraphs):
         p = ["<span data-src=\"%s\">%s</span>" % (_token_to_src(b), escape(_pad(x)))
              if _token_to_src(b) else escape(_pad(x))
              for b, x in zip(bases, p)]
-        html.append(u"<p>" + u"".join(p).strip() + u"</p>")
+        html.append((u"<p data-line=\"%d\">" % j) + u"".join(p).strip() + u"</p>")
 
     return list(words), u"\n".join(html)
 
@@ -54,13 +54,13 @@ def _tokenize_jpn(paragraphs):
         else:
             return escape(x.surface)
 
-    for para in paragraphs:
+    for j, para in enumerate(paragraphs):
         parts = mecab.collapse(mecab.parse(para))
         words.update(x.base + u"[" + x.base_reading + u"]" 
                      if x.base_reading and x.base_reading != x.base else x.base
                      for x in parts if x.base)
         p = [tohtml(x) for x in parts]
-        html.append(u"<p>" + u"".join(p) + u"</p>")
+        html.append((u"<p data-line=\"%d\">" % j) + u"".join(p) + u"</p>")
 
     return list(words), u"\n".join(html)
 

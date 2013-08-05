@@ -47,6 +47,18 @@ class Ebook(models.Model):
         index_together = (('author', 'title'),)
 
 
+class Bookmark(models.Model):
+    ebook = models.ForeignKey(Ebook, unique=True)
+
+    chapter = models.IntegerField()
+    paragraph = models.IntegerField()
+
+    timestamp = models.DateTimeField(auto_now=True, auto_now_add=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+
+
 @register_scanner
 def _book_scan(existing_files, mime_cache):
     files_in_db = set(Ebook.objects.values_list('filename', flat=True))
