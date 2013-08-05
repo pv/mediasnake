@@ -103,6 +103,9 @@ class Mecab(object):
 
             if item[2]:
                 base = re.sub(ur'^.*:', ur'', item[2])
+                # strip unnecessary copula
+                if base.endswith(u"だ") and not surface.endswith(u"だ"):
+                    base = base[:-1]
             else:
                 base = None
 
