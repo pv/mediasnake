@@ -3,11 +3,11 @@ var bookmark = (function() {
 
     var init = function(new_bookmark_url) {
 	bookmark_url = new_bookmark_url;
-	focusBookmark();
 	reinit();
     }
 
     var reinit = function () {
+	focusBookmark();
 	$("#ebook-text p").click(function () {
 	    updateBookmark($(this).attr("data-line"));
 	    return true;
