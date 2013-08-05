@@ -12,6 +12,7 @@ from django.views.decorators.cache import cache_control
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.utils.encoding import smart_text
 
 from mediasnakebooks.models import Ebook, Word, Language, Bookmark
 from mediasnakebooks.epubtools import open_epub
@@ -233,7 +234,7 @@ def words(request, language):
     for j in range(0, len(words), chunksize):
         word_objs = Word.objects.filter(base_form__in=words[j:j+chunksize], language=lang)
         for w in word_objs:
-            j = words.index(w.base_form)
+            j = words.index(smart_text(w.base_form))
             known[j] = w.known
             notes[j] = w.notes
 
@@ -282,12 +283,12 @@ def words_export(request, language):
         if w.known in (0, 5):
             continue
 
-        m = re.match(ur'^(.*?)\s*\[(.*)\]\s*$', w.base_form)
+        m = re.match(ur'^(.*?)\s*\[(.*)\]\s*$', smart_text(w.base_form))
         if m:
             base_form = m.group(1)
             alt_form = m.group(2)
         else:
-            base_form = w.base_form
+            base_form = smart_text(w.base_form)
             alt_form = u""
 
         notes = w.notes
