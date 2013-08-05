@@ -3,7 +3,7 @@
 {% block title %}{{ ebook.title }} [{{ ebook.author }}]{% endblock %}
 
 {% block content %}
-<div id="modal-word" class="modal hide fade">
+<div id="modal-word" class="modal hide">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
     <h3 id="modal-word-header" class="modal-header"></h3>
@@ -19,21 +19,21 @@
 	<button class="btn btn-known-1 modal-word-known" value="1" id="modal-word-known-1">[1]</button>
 	<button class="btn btn-known-0 modal-word-known" value="0" id="modal-word-known-0">[Ign]</button>
       </div>
+      <div class="pull-right">
+	<a href="#" class="btn btn" data-dismiss="modal">Close</a>
+	<a class="btn btn-primary" onclick="study.adjust();">Save</a>
+      </div>
     </div>
-    <div class="controls">
+    <div class="controls clear">
       <span>
-	<label>Notes:</label>
-	<textarea id="modal-word-notes"></textarea>
+	<label class="pull-left">Notes:</label>
+	<textarea id="modal-word-notes" rows="1" cols="50"></textarea>
       </span>
     </div>
     <div>
       <a id="modal-word-external-dict" class="btn btn-link pull-right" target="_blank" href="#">External dictionary</a>
     </div>
     <pre id="modal-word-dict"></pre>
-  </div>
-  <div class="modal-footer">
-    <a href="#" class="btn btn" data-dismiss="modal">Close</a>
-    <a class="btn btn-primary" onclick="study.adjust();">Save</a>
   </div>
 </div>
 <div class='ebook'>

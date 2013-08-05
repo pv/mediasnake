@@ -100,3 +100,11 @@ div.controls a.pull-right {
 table.booklist td {
     padding: 4px 12px;
 }
+
+div.controls label {
+    margin-right: 5px;
+}
+
+.modal.modal-header h3 {
+    border-bottom: none;
+}
