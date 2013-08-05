@@ -25,6 +25,8 @@ var study = (function() {
 	word_url = new_word_url;
 	words_url = new_words_url;
 
+	$("#ebook-text").addClass("big-text");
+
 	$.get(new_token_url, function (data) {
 	    $("#ebook-text").html(data["html"]);
 	    bookmark.reinit();
