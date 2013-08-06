@@ -14,9 +14,9 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.utils.encoding import smart_text
 
-from mediasnakebooks.models import Ebook, Word, Language, Bookmark
+from mediasnakebooks.models import Ebook, Word, Language, Bookmark, WordContext
 from mediasnakebooks.epubtools import open_epub
-from mediasnakebooks.tokenize import tokenize
+from mediasnakebooks.tokenize import tokenize, tokenize_context
 from mediasnakebooks._stardict import Stardict
 
 
@@ -257,13 +257,21 @@ def word_adjust(request, language, word):
         if known < 0 or known > 5:
             raise ValueError
         notes = unicode(request.POST['notes'])
+        context = unicode(request.POST['context'])
     except (ValueError, KeyError):
-        return HttpResponse("400 Bad request", status=400)
+        #return HttpResponse("400 Bad request", status=400)
+        raise
 
-    word, created = Word.objects.get_or_create(base_form=word, language=lang)
-    word.known = known
-    word.notes = notes
-    word.save()
+    parsed_context = tokenize_context(word, context, lang.code)
+
+    word_obj, created = Word.objects.get_or_create(base_form=word, language=lang)
+    word_obj.known = known
+    word_obj.notes = notes
+    word_obj.save()
+
+    if parsed_context:
+        # Remember the sentence fragment where the word appears in
+        WordContext.add(word_obj, parsed_context)
 
     content = json.dumps(dict(error=False))
     return HttpResponse(content, content_type="application/json")
@@ -278,27 +286,37 @@ def words_export(request, language):
 
     words = Word.objects.filter(language=lang).all()
 
+    sd = None
+    if lang.stardict is not None:
+        try:
+            sd = Stardict(lang.stardict)
+        except IOError:
+            pass
+
     rows = []
     for w in words:
         if w.known in (0, 5):
             continue
 
-        m = re.match(ur'^(.*?)\s*\[(.*)\]\s*$', smart_text(w.base_form))
-        if m:
-            base_form = m.group(1)
-            alt_form = m.group(2)
-        else:
-            base_form = smart_text(w.base_form)
-            alt_form = u""
+        base_raw = re.sub(ur'\[.*\]', u'', smart_text(w.base_form))
 
-        notes = w.notes
+        notes = smart_text(w.notes)
         if notes:
             notes = notes.replace(u"\n", u" ").replace(u"\t", u" ").strip()
         else:
             notes = u""
 
+        context = u"<p>".join(smart_text(wc.context)
+                               for wc in w.wordcontext_set.all())
+
+        if sd:
+            dict_entry = u"\n\n".join(sd.lookup(base_raw))
+            dict_entry = dict_entry.replace("\n", "<br>").replace(u"\t", u" ").strip()
+        else:
+            dict_entry = u""
+
         rows.append(u"\t".join(
-            [base_form, alt_form, unicode(w.known), notes]))
+            [smart_text(w.base_form), base_raw, unicode(w.known), notes, context, dict_entry]))
 
     response = HttpResponse(u"\n".join(rows), content_type="text/csv")
     response['Content-Disposition'] = "attachment; filename=\"words-%s.csv\"" % (lang.code)

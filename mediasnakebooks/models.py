@@ -1,6 +1,9 @@
 import os
+import random
 
+import django.utils.timezone
 from django.db import models
+from django.utils.encoding import smart_text
 
 from mediasnakefiles.scanner import register_scanner, scan_message
 from mediasnakebooks.epubtools import open_epub
@@ -9,6 +12,7 @@ UNKNOWN = 5
 WELL_KNOWN = 1
 IGNORED = 0
 
+MAX_CONTEXT = 3
 
 class Language(models.Model):
     code = models.CharField(max_length=3, help_text="3-letter ISO language code",
@@ -36,6 +40,72 @@ class Word(models.Model):
 
     def __unicode__(self):
         return u"%s: %s" % (self.language.code, self.base_form)
+
+
+class WordContext(models.Model):
+    word = models.ForeignKey(Word, null=False)
+    context = models.TextField(null=False, blank=False)
+    timestamp = models.DateTimeField(auto_now=True, auto_now_add=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+
+    @classmethod
+    def add(cls, word, context):
+        try:
+            # avoid inserting duplicates
+            ctx_obj = cls.objects.get(word=word, context=context)
+            ctx_obj.timestamp = django.utils.timezone.now()
+            ctx_obj.save()
+            return
+        except cls.DoesNotExist:
+            pass
+
+        obj = cls(word=word, context=context)
+        obj.save()
+        cls.cleanup(word, MAX_CONTEXT)
+
+    @classmethod
+    def cleanup(cls, word, n):
+        """
+        Remove entries, keeping at most `n`. Try to maintain a
+        specific age distribution.
+        """
+        if n < 0:
+            raise ValueError("n must be positive")
+
+        while True:
+            subset = cls.objects.filter(word=word).all()
+            count = len(subset)
+            if count <= n:
+                break
+            elif count == 1:
+                subset.delete()
+                break
+
+            baseline = subset[0].timestamp + (subset[0].timestamp - subset[1].timestamp)
+            sum_weight = 0
+            cmf = []
+            for x in subset:
+                weight = 1/(1 + abs((baseline - x.timestamp).total_seconds()))
+                sum_weight += weight
+                cmf.append(sum_weight)
+            cmf = [w/sum_weight for w in cmf]
+
+            p = random.random()
+            for j, w in enumerate(cmf):
+                if p <= w:
+                    subset[j].delete()
+                    break
+            else:
+                raise AssertionError("This can never occur")
+
+    def __unicode__(self):
+        c = smart_text(self.context)
+        if len(c) > 15:
+            return u"%s -- \"%s...\"" % (smart_text(self.word.base_form), c[:15])
+        else:
+            return u"%s -- \"%s\"" % (smart_text(self.word.base_form), c)
 
 
 class Ebook(models.Model):

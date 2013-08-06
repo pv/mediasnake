@@ -55,6 +55,7 @@ var study = (function() {
 	});
 
 	$("#ebook-text span.word").click(function() {
+	    var context = $(this).parent().html();
 	    var word = $(this).attr('data-src');
 	    var entry = this;
 
@@ -62,14 +63,15 @@ var study = (function() {
 		return true;
 	    }
 
-	    popupWordModal(word);
+	    popupWordModal(word, context);
 	    return true;
 	});
     };
 
-    var popupWordModal = function(word) {
+    var popupWordModal = function(word, context) {
 	$("#modal-word-header").text(word);
 	$("#modal-word-word").attr("value", word);
+	$("#modal-word-context").attr("value", context);
 
 	if (external_dict_url) {
 	    var url;
@@ -113,13 +115,14 @@ var study = (function() {
 	var word, level, note, data;
 
 	word = $("#modal-word-word").attr("value");
+	context = $("#modal-word-context").attr("value");
 	note = $("#modal-word-notes").val();
 
 	$("#modal-word .modal-word-known.active").each(function () {
 	    level = $(this).attr("value");
 	});
 
-	data = { "known": level, "notes": note };
+	data = { "known": level, "notes": note, "context": context };
 
 	$.post(word_url.replace('@WORD@', word), data, function(data) {
 	    if (!data["error"]) {
