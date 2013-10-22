@@ -83,19 +83,38 @@ class Stardict(object):
             k = key.encode('utf-8')
 
             j = bisect.bisect_left(self.index, (k, ""))
-            try:
-                key2 = self.index[j][0].decode('utf-8')
-            except IndexError:
-                key = key[:-1]
-                continue
+
+            if j > 0:
+                key2 = self.index[j-1][0].decode('utf-8')
+            else:
+                key2 = None
+            if j < len(self.index):
+                key3 = self.index[j][0].decode('utf-8')
+            else:
+                key3 = None
+
+            if not (key2 or key3):
+                return None
 
             if key == key2:
                 return key2
+            elif key == key3:
+                return key3
 
-            if key2.startswith(key):
-                key = key[:-1]
+            if key2:
+                prefix2 = os.path.commonprefix([key, key2])
             else:
-                key = os.path.commonprefix([key, key2])
+                prefix2 = u""
+
+            if key3:
+                prefix3 = os.path.commonprefix([key, key3])
+            else:
+                prefix3 = u""
+
+            if len(prefix2) > len(prefix3):
+                key = prefix2
+            else:
+                key = prefix3
 
         return None
 
