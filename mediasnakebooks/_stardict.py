@@ -111,10 +111,12 @@ class Stardict(object):
             else:
                 prefix3 = u""
 
-            if len(prefix2) > len(prefix3):
+            if len(prefix2) < len(key) and len(prefix2) > len(prefix3):
                 key = prefix2
-            else:
+            elif len(prefix3) < len(key):
                 key = prefix3
+            else:
+                key = key[:-1]
 
         return None
 
