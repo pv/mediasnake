@@ -129,7 +129,7 @@ class TxtFile(BaseEpub):
         re.compile(ur"^(?P<titl>.+)$")
     ]
 
-    CHAPTER_SIZE = 200
+    CHAPTER_SIZE = 50
 
     def __init__(self, filename):
         assert isinstance(filename, unicode)
