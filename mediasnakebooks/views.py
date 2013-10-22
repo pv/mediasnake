@@ -181,8 +181,13 @@ def bookmark(request, id, chapter):
 @login_required
 @cache_page(30*24*60*60)
 def tokens(request, id, chapter, language):
+    try:
+        lang = Language.objects.get(code=language)
+    except Language.DoesNotExist:
+        raise Http404
+
     ebook, epub, chapters, paragraphs, chapter = _get_epub(id, chapter)
-    words, html = tokenize(paragraphs, language)
+    words, html = tokenize(paragraphs, lang)
 
     html = re.sub(u' </span>', u'</span> ', html)
     html = re.sub(u'(<span[^>]*>) ', ur' \1', html)
@@ -262,7 +267,7 @@ def word_adjust(request, language, word):
         #return HttpResponse("400 Bad request", status=400)
         raise
 
-    parsed_context = tokenize_context(word, context, lang.code)
+    parsed_context = tokenize_context(word, context, lang)
 
     word_obj, created = Word.objects.get_or_create(base_form=word, language=lang)
     word_obj.known = known

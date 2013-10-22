@@ -5,7 +5,8 @@ from HTMLParser import HTMLParser
 
 from django.utils.html import escape
 
-import _mecab
+from mediasnakebooks._stardict import Stardict
+from mediasnakebooks import _mecab
 
 
 def is_period(token):
@@ -29,7 +30,7 @@ def _pad(x):
         return u" " + x
 
 
-def _tokenize_eng(paragraphs):
+def _tokenize_eng(paragraphs, stardict):
     html = []
     words = set()
 
@@ -49,7 +50,7 @@ def _tokenize_eng(paragraphs):
     return list(words), u"\n".join(html)
 
 
-def _tokenize_jpn(paragraphs):
+def _tokenize_jpn(paragraphs, stardict):
     mecab = _mecab.Mecab()
 
     html = []
@@ -65,7 +66,7 @@ def _tokenize_jpn(paragraphs):
             return escape(x.surface)
 
     for j, para in enumerate(paragraphs):
-        parts = mecab.collapse(mecab.parse(para))
+        parts = mecab.dict_collapse(mecab.parse(para), stardict, reading_check=False)
         words.update(x.base + u"[" + x.base_reading + u"]" 
                      if x.base_reading and x.base_reading != x.base else x.base
                      for x in parts if x.base and x.base.isalpha())
@@ -75,11 +76,35 @@ def _tokenize_jpn(paragraphs):
     return list(words), u"\n".join(html)
 
 
+def _tokenize_cmn(paragraphs, stardict):
+    html = []
+    words = set()
+
+    for j, para in enumerate(paragraphs):
+        parts = stardict_split(para, stardict)
+        bases = [p if stardict.lookup(p) else None for p in parts]
+
+        words.update(x for x in bases if x)
+        p = ["<span data-src=\"%s\">%s</span>" % (escape(b), escape(x))
+             if b else escape(x)
+             for b, x in zip(bases, parts)]
+        html.append((u"<p data-line=\"%d\">" % j) + u"".join(p).strip() + u"</p>")
+
+    return list(words), u"\n".join(html)
+
+
 def tokenize(paragraphs, language):
-    if language == "jpn":
-        return _tokenize_jpn(paragraphs)
+    if language.stardict is not None:
+        stardict = Stardict(language.stardict)
     else:
-        return _tokenize_eng(paragraphs)
+        stardict = None
+
+    if language.code == "jpn":
+        return _tokenize_jpn(paragraphs, stardict)
+    elif language.code == "cmn":
+        return _tokenize_cmn(paragraphs, stardict)
+    else:
+        return _tokenize_eng(paragraphs, stardict)
 
 
 class ContextParser(HTMLParser):
@@ -144,3 +169,19 @@ def tokenize_context_all(word, paragraph):
 
 def tokenize_context(word, paragraph, language):
     return tokenize_context_all(word, paragraph)
+
+
+
+def stardict_split(text, stardict):
+    new_parts = []
+
+    while text:
+        prefix = stardict.longest_prefix(text)
+        if prefix is None:
+            new_parts.append(text[0])
+            text = text[1:]
+        else:
+            new_parts.append(prefix)
+            text = text[len(prefix):]
+
+    return new_parts

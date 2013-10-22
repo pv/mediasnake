@@ -78,8 +78,8 @@ class Mecab(object):
         ]
 
     def parse(self, expr):
-        expr = expr.replace("\n", " ")
-        expr = expr.replace(u'\uff5e', "~")
+        expr = expr.replace(u"\n", u" ")
+        expr = expr.replace(u'\uff5e', u"~")
 
         self.pipe.stdin.write(expr.encode(self.encoding, "ignore") + '\n')
         self.pipe.stdin.flush()
@@ -157,7 +157,7 @@ class Mecab(object):
 
         return new_items
 
-    def dict_collapse(self, items, edict, max_distance=5, auxiliary=True):
+    def dict_collapse(self, items, edict, max_distance=5, auxiliary=True, reading_check=True):
         parts = self.collapse(list(items), auxiliary=auxiliary)
         new_parts = []
 
@@ -214,7 +214,7 @@ class Mecab(object):
                 if res is None and trial2 is not None:
                     res = edict.get(trial2)
 
-                if trial_reading and res:
+                if trial_reading and res and reading_check:
                     # pick only dictionary entries with matching reading
                     new_res = []
                     for dictitem in res:

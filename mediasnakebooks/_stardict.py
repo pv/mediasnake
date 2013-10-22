@@ -71,6 +71,28 @@ class Stardict(object):
             _INDEX_CACHE.clear()
         _INDEX_CACHE[self.idx_file] = self.index
 
+    def longest_prefix(self, key):
+        """
+        Find longest key in dictionary that the given key starts with
+        """
+        if not isinstance(key, unicode):
+            key = key.decode('utf-8')
+
+        while key:
+            k = key.encode('utf-8')
+
+            j = bisect.bisect_left(self.index, (k, ""))
+            key2 = self.index[j][0].decode('utf-8')
+            if key == key2:
+                return key2
+
+            if key2.startswith(key):
+                key = key[:-1]
+            else:
+                key = os.path.commonprefix([key, key2])
+
+        return None
+
     def lookup(self, key):
         if isinstance(key, unicode):
             key = key.encode('utf-8')
@@ -89,3 +111,11 @@ class Stardict(object):
             j += 1
 
         return items
+
+    def get(self, key):
+        if not isinstance(key, (unicode, str)):
+            return None
+        r = self.lookup(key)
+        if not r:
+            return None
+        return [(key, None, x) for x in r]
