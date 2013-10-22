@@ -35,6 +35,7 @@ class Stardict(object):
 
         self.dict_file_obj = None
         self.index = []
+        self._index_one = None
 
         self._read_index()
 
@@ -93,6 +94,13 @@ class Stardict(object):
 
         return None
 
+    def contains(self, key):
+        if isinstance(key, unicode):
+            key = key.encode('utf-8')
+        if self._index_one is None:
+            self._index_one = dict(self.index)
+        return key in self._index_one
+
     def lookup(self, key):
         if isinstance(key, unicode):
             key = key.encode('utf-8')
@@ -114,6 +122,8 @@ class Stardict(object):
 
     def get(self, key):
         if not isinstance(key, (unicode, str)):
+            return None
+        if not self.contains(key):
             return None
         r = self.lookup(key)
         if not r:
