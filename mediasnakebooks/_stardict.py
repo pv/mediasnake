@@ -83,7 +83,12 @@ class Stardict(object):
             k = key.encode('utf-8')
 
             j = bisect.bisect_left(self.index, (k, ""))
-            key2 = self.index[j][0].decode('utf-8')
+            try:
+                key2 = self.index[j][0].decode('utf-8')
+            except IndexError:
+                key = key[:-1]
+                continue
+
             if key == key2:
                 return key2
 
