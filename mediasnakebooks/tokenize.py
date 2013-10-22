@@ -66,6 +66,7 @@ def _tokenize_jpn(paragraphs, stardict):
             return escape(x.surface)
 
     for j, para in enumerate(paragraphs):
+        para = re.sub(u"《.*?》", u"", para)
         parts = mecab.dict_collapse(mecab.parse(para), stardict, reading_check=False)
         words.update(x.base + u"[" + x.base_reading + u"]" 
                      if x.base_reading and x.base_reading != x.base else x.base
