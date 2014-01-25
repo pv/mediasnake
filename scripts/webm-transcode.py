@@ -194,12 +194,17 @@ def _process_file(src, dst, options, tmpfn, tmpdir):
     num_threads = max(2, multiprocessing.cpu_count()//options.jobs) - 1
 
     codec_args = ['-filter:v', 'hqdn3d',
-                  '-c:a', 'libvorbis',
-                  '-qscale:a', '3',
                   '-c:v', 'libvpx',
                   '-threads', str(num_threads),
                   '-b:v', '%dk' % (int(video_kbitrate),),
                   ]
+
+    if all(s.codec == 'vorbis' for s in info.audio_streams):
+        # No need to re-encode
+        codec_args += ['-c:a', 'copy']
+    else:
+        # Re-encode as vorbis
+        codec_args += ['-c:a', 'libvorbis', '-qscale:a', '3']
 
     if options.fast:
         codec_args += ['-deadline', 'good', '-cpu-used', '5']
