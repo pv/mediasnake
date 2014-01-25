@@ -197,13 +197,14 @@ def _process_file(src, dst, options, tmpfn, tmpdir):
                   '-c:a', 'libvorbis',
                   '-qscale:a', '3',
                   '-c:v', 'libvpx',
-                  '-crf', '14',
                   '-threads', str(num_threads),
                   '-b:v', '%dk' % (int(video_kbitrate),),
                   ]
 
     if options.fast:
         codec_args += ['-deadline', 'good', '-cpu-used', '5']
+    else:
+        codec_args += ['-deadline', 'good', '-cpu-used', '0']
 
     cmd = (['ffmpeg',
             '-y',
