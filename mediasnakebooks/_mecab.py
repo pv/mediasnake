@@ -188,6 +188,15 @@ class Mecab(object):
                 if res and len(res) == 1:
                     base_reading = list(res)[0]
 
+            # Check for to-adv not recognized by mecab but in edict
+            if (surface.endswith(u'と')
+                and is_kana_only(surface)
+                and (not base or base == surface)
+                and not edict.get(surface)
+                and edict.get(surface[:-1])):
+                base = surface[:-1]
+                base_reading = surface[:-1]
+
             # Check how long words can be found in edict 
             good_j = -1
             trial = surface
