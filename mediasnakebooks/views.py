@@ -291,13 +291,6 @@ def words_export(request, language):
 
     words = Word.objects.filter(language=lang).all()
 
-    sd = None
-    if lang.stardict is not None:
-        try:
-            sd = Stardict(lang.stardict)
-        except IOError:
-            pass
-
     rows = []
     for w in words:
         if w.known in (0, 5):
@@ -314,14 +307,8 @@ def words_export(request, language):
         context = u"<p>".join(smart_text(wc.context)
                                for wc in w.wordcontext_set.all())
 
-        if sd:
-            dict_entry = u"\n\n".join(sd.lookup(base_raw))
-            dict_entry = dict_entry.replace("\n", "<br>").replace(u"\t", u" ").strip()
-        else:
-            dict_entry = u""
-
         rows.append(u"\t".join(
-            [smart_text(w.base_form), base_raw, unicode(w.known), notes, context, dict_entry]))
+            [smart_text(w.base_form), base_raw, unicode(w.known), notes, context]))
 
     response = HttpResponse(u"\n".join(rows), content_type="text/csv")
     response['Content-Disposition'] = "attachment; filename=\"words-%s.csv\"" % (lang.code)
