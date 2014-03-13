@@ -4,6 +4,7 @@ import random
 import django.utils.timezone
 from django.db import models
 from django.utils.encoding import smart_text
+from django.db import connection
 
 from mediasnakefiles.scanner import register_scanner, scan_message
 from mediasnakebooks.epubtools import open_epub
@@ -44,18 +45,23 @@ class Word(models.Model):
     @classmethod
     def get_known_with_context(cls, language, context_separator=""):
         """
-        Get a list of known words, with an additional 'context' field
-        containing concatenated context entries.
+        Get a list of known words, with concatenated context entries.
+
+        Returns items as (base_form, known, notes, context)
         """
+        cursor = connection.cursor()
         lang = Language.objects.get(code=language)
-        return cls.objects.raw("""
-        SELECT w.id AS id, w.known AS known, w.base_form AS base_form,
-               w.notes AS notes, GROUP_CONCAT(c.context, %s) AS context
+        cursor.execute("""
+        SELECT w.base_form AS base_form,
+               w.known AS known,
+               w.notes AS notes,
+               GROUP_CONCAT(c.context, %s) AS context
         FROM mediasnakebooks_word AS w
         LEFT JOIN mediasnakebooks_wordcontext AS c ON w.id = c.word_id
         WHERE w.known != 0 AND w.known != 5 AND w.language_id = %s
         GROUP BY w.id
         """, [context_separator, lang.pk])
+        return cursor.fetchall()
 
 
 class WordContext(models.Model):

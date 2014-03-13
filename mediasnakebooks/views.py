@@ -289,24 +289,24 @@ def words_export(request, language):
     except Language.DoesNotExist:
         raise Http404
 
-    words = Word.get_known_with_context(language=lang, context_separator="<p>")
+    items = Word.get_known_with_context(language=lang, context_separator="<p>")
 
     rows = []
-    for w in words:
-        base_raw = re.sub(ur'\[.*\]', u'', smart_text(w.base_form))
-        notes = smart_text(w.notes)
+    for base_form, known, notes, context in items:
+        base_raw = re.sub(ur'\[.*\]', u'', smart_text(base_form))
+        notes = smart_text(notes)
         if notes:
             notes = notes.replace(u"\n", u" ").replace(u"\t", u" ").strip()
         else:
             notes = u""
-        context = w.context
+        context = context
         if context:
             context = smart_text(context).replace(u"\n", u" ").replace(u"\t", u" ").strip()
         else:
             context = u""
 
         rows.append(u"\t".join(
-            [smart_text(w.base_form), base_raw, unicode(w.known), notes, context]))
+            [smart_text(base_form), base_raw, unicode(known), notes, context]))
 
     response = HttpResponse(u"\n".join(rows), content_type="text/csv")
     response['Content-Disposition'] = "attachment; filename=\"words-%s.csv\"" % (lang.code)
