@@ -289,23 +289,21 @@ def words_export(request, language):
     except Language.DoesNotExist:
         raise Http404
 
-    words = Word.objects.filter(language=lang).all()
+    words = Word.get_known_with_context(language=lang, context_separator="<p>")
 
     rows = []
     for w in words:
-        if w.known in (0, 5):
-            continue
-
         base_raw = re.sub(ur'\[.*\]', u'', smart_text(w.base_form))
-
         notes = smart_text(w.notes)
         if notes:
             notes = notes.replace(u"\n", u" ").replace(u"\t", u" ").strip()
         else:
             notes = u""
-
-        context = u"<p>".join(smart_text(wc.context)
-                               for wc in w.wordcontext_set.all())
+        context = w.context
+        if context:
+            context = smart_text(context)
+        else:
+            context = u""
 
         rows.append(u"\t".join(
             [smart_text(w.base_form), base_raw, unicode(w.known), notes, context]))

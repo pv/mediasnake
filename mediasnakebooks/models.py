@@ -41,6 +41,22 @@ class Word(models.Model):
     def __unicode__(self):
         return u"%s: %s" % (self.language.code, self.base_form)
 
+    @classmethod
+    def get_known_with_context(cls, language, context_separator=""):
+        """
+        Get a list of known words, with an additional 'context' field
+        containing concatenated context entries.
+        """
+        lang = Language.objects.get(code=language)
+        return cls.objects.raw("""
+        SELECT w.id AS id, w.known AS known, w.base_form AS base_form,
+               w.notes AS notes, GROUP_CONCAT(c.context, %s) AS context
+        FROM mediasnakebooks_word AS w
+        LEFT JOIN mediasnakebooks_wordcontext AS c ON w.id = c.word_id
+        WHERE w.known != 0 AND w.known != 5 AND w.language_id = %s
+        GROUP BY w.id
+        """, [context_separator, lang.pk])
+
 
 class WordContext(models.Model):
     word = models.ForeignKey(Word, null=False)
