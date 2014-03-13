@@ -301,7 +301,7 @@ def words_export(request, language):
             notes = u""
         context = w.context
         if context:
-            context = smart_text(context)
+            context = smart_text(context).replace(u"\n", u" ").replace(u"\t", u" ").strip()
         else:
             context = u""
 
