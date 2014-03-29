@@ -140,7 +140,7 @@ var study = (function() {
 	    level = 0;
 	}
 	else {
-	    if (level < 4) {
+	    if (level < 4 && level >= 1) {
 		level = level + 1;
 	    }
 	    else if (level == 4) {
