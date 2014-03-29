@@ -51,31 +51,30 @@ def _tokenize_eng(paragraphs, stardict):
 
 
 def _tokenize_jpn(paragraphs, stardict):
-    mecab = _mecab.Mecab()
+    with _mecab.Mecab() as mecab:
+        html = []
+        words = set()
 
-    html = []
-    words = set()
+        def tohtml(x):
+            if x.base and x.base.isalpha():
+                base = x.base
+                if x.base_reading and x.base_reading != x.base:
+                    base += u"[" + x.base_reading + u"]"
+                return u"<span data-src=\"%s\">%s</span>" % (escape(_token_to_src(base)), escape(x.surface))
+            else:
+                return escape(x.surface)
 
-    def tohtml(x):
-        if x.base and x.base.isalpha():
-            base = x.base
-            if x.base_reading and x.base_reading != x.base:
-                base += u"[" + x.base_reading + u"]"
-            return u"<span data-src=\"%s\">%s</span>" % (escape(_token_to_src(base)), escape(x.surface))
-        else:
-            return escape(x.surface)
+        for j, para in enumerate(paragraphs):
+            para = re.sub(u"《.*?》", u"", para)
+            para = re.sub(u"｜", u"", para)
+            parts = mecab.dict_collapse(mecab.parse(para), stardict, reading_check=False)
+            words.update(x.base + u"[" + x.base_reading + u"]" 
+                         if x.base_reading and x.base_reading != x.base else x.base
+                         for x in parts if x.base and x.base.isalpha())
+            p = [tohtml(x) for x in parts]
+            html.append((u"<p data-line=\"%d\">" % j) + u"".join(p) + u"</p>")
 
-    for j, para in enumerate(paragraphs):
-        para = re.sub(u"《.*?》", u"", para)
-        para = re.sub(u"｜", u"", para)
-        parts = mecab.dict_collapse(mecab.parse(para), stardict, reading_check=False)
-        words.update(x.base + u"[" + x.base_reading + u"]" 
-                     if x.base_reading and x.base_reading != x.base else x.base
-                     for x in parts if x.base and x.base.isalpha())
-        p = [tohtml(x) for x in parts]
-        html.append((u"<p data-line=\"%d\">" % j) + u"".join(p) + u"</p>")
-
-    return list(words), u"\n".join(html)
+        return list(words), u"\n".join(html)
 
 
 def _tokenize_cmn(paragraphs, stardict):

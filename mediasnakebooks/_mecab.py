@@ -10,6 +10,7 @@ MecabPart = collections.namedtuple('MecabPart', [
 
 class Mecab(object):
     def __init__(self):
+        self.pipe = None
         self.encoding = None
         self.args = []
 
@@ -17,6 +18,20 @@ class Mecab(object):
         self._detect_fields()
 
         self.pipe = self._pipe(self.args)
+
+    def __del__(self):
+        self.close()
+
+    def close(self):
+        if self.pipe:
+            self.pipe.communicate()
+            self.pipe = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()
 
     def _pipe(self, args):
         args = ["mecab"] + list(args)
