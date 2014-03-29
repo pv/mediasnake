@@ -71,7 +71,8 @@ var study = (function() {
     var popupWordModal = function(word, context) {
 	var level, note, j;
 
-	$("#modal-word-header").text(word);
+	base_word = word.replace(/\[.*\]/, "");
+	$("#modal-word-header").text(base_word);
 	$("#modal-word-word").attr("value", word);
 	$("#modal-word-context").attr("value", context);
 
