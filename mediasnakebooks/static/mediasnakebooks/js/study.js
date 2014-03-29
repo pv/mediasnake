@@ -69,12 +69,17 @@ var study = (function() {
     };
 
     var popupWordModal = function(word, context) {
+	var level, note, j;
+
 	$("#modal-word-header").text(word);
 	$("#modal-word-word").attr("value", word);
 	$("#modal-word-context").attr("value", context);
 
+	j = words.indexOf(word);
+    
+	// Load word from external dictionary
 	if (external_dict_url) {
-	    var url;
+	    var url, base_word;
 	    base_word = word.replace(/\[.*\]/, "");
 	    url = external_dict_url.replace('@WORD@', base_word).replace('@word@', base_word);
 	    $("#modal-word-external-dict").attr('href', url);
@@ -83,16 +88,6 @@ var study = (function() {
 	else {
 	    $("#modal-word-external-dict").addClass('hide');
 	}
-
-	$(".modal-word-known").removeClass('active');
-	level = known[words.indexOf(word)];
-	$("#modal-word-known-" + level).addClass('active');
-
-	note = notes[words.indexOf(word)];
-	if (!note) {
-	    note = "";
-	}
-	$("#modal-word-notes").val(note);
 
 	$("#modal-word-dict").text("<Loading dictionary...>");
 
@@ -108,19 +103,82 @@ var study = (function() {
 	    }
 	});
 
+	// Load notes
+	note = notes[j];
+	if (!note) {
+	    note = "";
+	}
+	$("#modal-word-notes").val(note);
+
+	// Update buttons
+	level = known[j];
+	$("#modal-word-known-group .btn").removeClass("btn-known-0 btn-known-1 btn-known-2 btn-known-3 btn-known-4 btn-known-5");
+	$("#modal-word-known").addClass("btn-known-" + getNextLevel(level, 1));
+	$("#modal-word-unknown").addClass("btn-known-" + getNextLevel(level, 0));
+	$("#modal-word-ignore").addClass("btn-known-" + getNextLevel(level, -1));
+
+	// Show dialog
+	$("#modal-word-buttons").show();
+	$("#modal-word-answer").hide();
 	$("#modal-word").modal();
     }
 
-    var adjust = function () {
-	var word, level, note, data;
+    var getNextLevel = function(level, isKnown) {
+	if (isKnown == 1) {
+	    if (level > 1) {
+		level = level - 1;
+	    }
+	    else if (level == 1) {
+		// Noop
+	    }
+	    else {
+		level = 4;
+	    }
+	}
+	else if (isKnown == -1) {
+	    level = 0;
+	}
+	else {
+	    if (level < 4) {
+		level = level + 1;
+	    }
+	    else if (level == 4) {
+		// Noop
+	    }
+	    else {
+		level = 4;
+	    }
+	}
+	return level;
+    }
+
+    var markKnown = function(isKnown) {
+	var j, word;
+
+	word = $("#modal-word-word").attr("value");
+	j = words.indexOf(word)
+	level = getNextLevel(known[j], isKnown);
+	known[j] = level;
+
+	save();
+
+	if (isKnown == 0) {
+	    $("#modal-word-buttons").hide();
+	    $("#modal-word-answer").show();
+	}
+	else {
+	    $("#modal-word").modal("hide");
+	}
+    }
+
+    var save = function () {
+	var word, level, note, data, j;
 
 	word = $("#modal-word-word").attr("value");
 	context = $("#modal-word-context").attr("value");
 	note = $("#modal-word-notes").val();
-
-	$("#modal-word .modal-word-known.active").each(function () {
-	    level = $(this).attr("value");
-	});
+	j = words.indexOf(word);
+	level = known[j];
 
 	data = { "known": level, "notes": note, "context": context };
 
@@ -128,14 +186,17 @@ var study = (function() {
 	    if (!data["error"]) {
 		var selector = ".word[data-src=\"" + word + "\"]";
 		var j = words.indexOf(word);
-		known[j] = level;
 		notes[j] = note;
 		$(selector).removeClass("known-0 known-1 known-2 known-3 known-4 known-5");
 		$(selector).addClass("word known-" + known[j]);
 	    }
 	});
+    }
+
+    var saveAndHide = function() {
+	save();
 	$("#modal-word").modal("hide");
     }
 
-    return { init: init, adjust: adjust };
+    return { init: init, markKnown: markKnown, saveAndHide: saveAndHide };
 })();

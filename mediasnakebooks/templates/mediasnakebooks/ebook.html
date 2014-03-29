@@ -11,30 +11,28 @@
     <input type="hidden" id="modal-word-context"></input>
   </div>
   <div id="modal-word-body" class="modal-body">
-    <div class="controls">
-      <div id="modal-word-known-group" class="btn-group" data-toggle="buttons-radio">
-	<button class="btn btn-known-5 modal-word-known" value="5" id="modal-word-known-5">[Unk]</button>
-	<button class="btn btn-known-4 modal-word-known" value="4" id="modal-word-known-4">[4]</button>
-	<button class="btn btn-known-3 modal-word-known" value="3" id="modal-word-known-3">[3]</button>
-	<button class="btn btn-known-2 modal-word-known" value="2" id="modal-word-known-2">[2]</button>
-	<button class="btn btn-known-1 modal-word-known" value="1" id="modal-word-known-1">[1]</button>
-	<button class="btn btn-known-0 modal-word-known" value="0" id="modal-word-known-0">[Ign]</button>
-      </div>
-      <div class="pull-right">
-	<a href="#" class="btn btn" data-dismiss="modal">Close</a>
-	<a class="btn btn-primary" onclick="study.adjust();">Save</a>
+    <div id="modal-word-buttons" class="controls">
+      <div id="modal-word-known-group" class="btn-group">
+	<button class="btn" id="modal-word-known" onclick="study.markKnown(1)">Know!</button>
+	<button class="btn" id="modal-word-unknown" onclick="study.markKnown(0)">Don't know?</button>
+	<button class="btn" id="modal-word-ignore" onclick="study.markKnown(-1)">Ignore.</button>
       </div>
     </div>
-    <div class="controls clear">
-      <span>
-	<label class="pull-left">Notes:</label>
-	<textarea id="modal-word-notes" rows="1" cols="50"></textarea>
-      </span>
+    <div id="modal-word-answer">
+      <div class="controls">
+	<div class="pull-right">
+	  <a class="btn btn-primary" onclick="study.saveAndHide();">Save</a>
+	</div>
+	<span>
+	  <label class="pull-left">Notes:</label>
+	  <textarea id="modal-word-notes" rows="1" cols="50"></textarea>
+	</span>
+      </div>
+      <div>
+	<a id="modal-word-external-dict" class="btn btn-link pull-right" target="_blank" href="#">External dictionary</a>
+      </div>
+      <pre id="modal-word-dict"></pre>
     </div>
-    <div>
-      <a id="modal-word-external-dict" class="btn btn-link pull-right" target="_blank" href="#">External dictionary</a>
-    </div>
-    <pre id="modal-word-dict"></pre>
   </div>
 </div>
 <div class='ebook'>

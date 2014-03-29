@@ -264,8 +264,7 @@ def word_adjust(request, language, word):
         notes = unicode(request.POST['notes'])
         context = unicode(request.POST['context'])
     except (ValueError, KeyError):
-        #return HttpResponse("400 Bad request", status=400)
-        raise
+        return HttpResponse("400 Bad request", status=400)
 
     parsed_context = tokenize_context(word, context, lang)
 
