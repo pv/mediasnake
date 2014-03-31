@@ -13,20 +13,22 @@
   <div id="modal-word-body" class="modal-body">
     <div id="modal-word-buttons" class="controls">
       <div id="modal-word-known-group" class="btn-group">
-	<button class="btn" id="modal-word-known" onclick="study.markKnown(1)">Know!</button>
-	<button class="btn" id="modal-word-unknown" onclick="study.markKnown(0)">Don't know?</button>
-	<button class="btn" id="modal-word-ignore" onclick="study.markKnown(-1)">Ignore.</button>
+	<button class="btn" id="modal-word-known" onclick="study.markKnown(1, 0)">Know!</button>
+	<button class="btn" id="modal-word-unknown" onclick="study.markKnown(0, 0)">Don't know?</button>
+	<button class="btn" id="modal-word-ignore" onclick="study.markKnown(-1, 0)">Ignore.</button>
       </div>
     </div>
     <div id="modal-word-answer">
       <div class="controls">
-	<div class="pull-right">
-	  <a class="btn btn-primary" onclick="study.saveAndHide();">Save</a>
+	<div>
+	  <a class="btn btn-primary" onclick="study.saveAndHide()">Save</a>
+	  <a class="btn" id="modal-word-known2" onclick="study.markKnown(1, 1)">Was known</a>
+	  <a class="btn" id="modal-word-unknown2" onclick="study.markKnown(0, 1)">Was not known</a>
 	</div>
-	<span>
-	  <label class="pull-left">Notes:</label>
-	  <textarea id="modal-word-notes" rows="1" cols="50"></textarea>
-	</span>
+      </div>
+      <div>
+	<label class="pull-left">Notes:</label>
+	<textarea id="modal-word-notes" rows="1" cols="50"></textarea>
       </div>
       <div>
 	<a id="modal-word-external-dict" class="btn btn-link pull-right" target="_blank" href="#">External dictionary</a>

@@ -153,7 +153,7 @@ var study = (function() {
 	return level;
     }
 
-    var markKnown = function(isKnown) {
+    var markKnown = function(isKnown, doClose) {
 	var j, word;
 
 	word = $("#modal-word-word").attr("value");
@@ -165,9 +165,20 @@ var study = (function() {
 
 	if (isKnown == 0) {
 	    $("#modal-word-buttons").hide();
+	    $("#modal-word-unknown2").hide();
+	    $("#modal-word-known2").show();
+	    $("#modal-word-answer").show();
+	}
+	else if (isKnown == 1) {
+	    $("#modal-word-buttons").hide();
+	    $("#modal-word-unknown2").show();
+	    $("#modal-word-known2").hide();
 	    $("#modal-word-answer").show();
 	}
 	else {
+	    $("#modal-word").modal("hide");
+	}
+	if (doClose) {
 	    $("#modal-word").modal("hide");
 	}
     }
