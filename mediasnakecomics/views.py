@@ -95,7 +95,7 @@ def _get_comic(id):
 
 
 @login_required
-#@cache_page(30*24*60*60)
+@cache_page(30*24*60*60)
 def comic(request, id):
     comic, pages = _get_comic(id)
 
@@ -118,7 +118,7 @@ def comic(request, id):
 
 
 @login_required
-#@cache_page(30*24*60*60)
+@cache_page(30*24*60*60)
 def image(request, id, page):
     page = int(page)
     comic, pages = _get_comic(id)
