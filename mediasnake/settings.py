@@ -128,6 +128,7 @@ INSTALLED_APPS = (
     'mediasnake_sendfile',
     'mediasnakefiles',
     'mediasnakebooks',
+    'mediasnakecomics',
     'south',
 )
 
