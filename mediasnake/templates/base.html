@@ -20,7 +20,7 @@
 	<a class="brand" href="#">Mediasnake</a>
 	<ul class="nav">
 	  {% if user.is_authenticated %}
-	  <li {% if '/account/' not in request.path and '/admin/' not in request.path and '/books/' not in request.path %}class="active"{% endif %}><a href="{% url 'index' %}">Videos</a></li>
+	  <li {% if '/account/' not in request.path and '/admin/' not in request.path and '/books/' not in request.path and '/comics/' not in request.path %}class="active"{% endif %}><a href="{% url 'index' %}">Videos</a></li>
 	  <li {% if '/books/' in request.path %}class="active"{% endif %}><a href="{% url 'ebook-index' %}">Books</a></li>
 	  <li {% if '/comics/' in request.path %}class="active"{% endif %}><a href="{% url 'comic-index' %}">Comics</a></li>
 	  <li {% if '/account/' in request.path %}class="active"{% endif %}><a href="{% url 'django.contrib.auth.views.password_change' %}">Account</a></li>
