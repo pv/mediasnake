@@ -17,5 +17,6 @@ urlpatterns = patterns('',
     url(r'^account/password-changed/$', 'django.contrib.auth.views.password_change_done'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^books/', include('mediasnakebooks.urls')),
+    url(r'^comics/', include('mediasnakecomics.urls')),
     url(r'^', include('mediasnakefiles.urls')),
 )

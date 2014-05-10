@@ -1,0 +1,48 @@
+{% extends "mediasnakecomics/base.html" %}
+
+{% block title %}{{ comic.title }} [{{ comic.path }}]{% endblock %}
+
+{% block content %}
+<div class='ebook'>
+  <div class='controls'>
+    {% if prev >= 0 %}
+    <a class="btn" href="{% url 'comic-page' comic.id prev %}">Prev</a>
+    {% endif %}
+    <select id="chapter-select">
+      <option value="" selected>Jump to page</option>
+      {% for _ in pages %}
+      <option value="{{ forloop.counter0 }}" {% if forloop.counter0 == page %}selected{% endif %}>{{ forloop.counter }}</option>
+      {% endfor %}
+    </select>
+    {% if next %}
+    <a class="btn pull-right" href="{% url 'comic-page' comic.id next %}">Next</a>
+    {% endif %}
+  </div>
+  <div class="ebook-text" id="ebook-text">
+    <img src="./image/">
+  </div>
+  <div class='controls'>
+    {% if prev %}
+    <a class="btn" href="{% url 'comic-page' comic.id prev %}">Prev</a>
+    {% endif %}
+    {% if next %}
+    <a class="btn pull-right" href="{% url 'comic-page' comic.id next %}">Next</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+$("#chapter-select").change(function() {
+    var dest = "";
+    $("#chapter-select option:selected").each(function () {
+        dest = $(this).attr("value");
+    });
+    if (dest != "") {
+        window.location = "{% url 'comic-page' comic.id '1234' %}".replace("1234", dest);
+    }
+});
+</script>
+{% endblock %}

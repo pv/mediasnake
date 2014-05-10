@@ -1,0 +1,56 @@
+{% extends "mediasnakecomics/base.html" %}
+
+{% block title %}Comics{% endblock %}
+
+{% block content %}
+<h1>Recently read</h1>
+
+<div class="controls">
+  {% if recent.has_previous %}
+  <a class="btn" href="?page={{ recent.previous_page_number }}">Prev</a>
+  {% endif %}
+  
+  <select id="page-select">
+    {% for page in pages %}
+    <option value="{{ page }}" {% if page == recent.number %}selected{% endif %}>Page {{ page }}</option>
+    {% endfor %}
+  </select>
+  
+  {% if recent.has_next %}
+  <a class="btn" href="?page={{ recent.next_page_number }}">Next</a>
+  {% endif %}
+
+  <span class="search">
+    <form action="" method="GET">
+      <input class="text" type="text" name="search" value="{{ search_str }}">
+      <input type="hidden" name="page" value="{{ recent.number }}">
+      <input class="btn" type="Submit" value="Search">
+    </form>
+  </span>
+</div>
+
+<table class="booklist">
+  {% for r in recent %}
+  <tr>
+    <td><a href="{% url 'comic-start' r.comic.id %}">{{ r.comic.title }}</a></td>
+    <td>{{ r.comic.path }}</td>
+    <td>{{ r.timestamp.date }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+$("#page-select").change(function() {
+    var dest = "";
+    $("#page-select option:selected").each(function () {
+        dest = $(this).attr("value");
+    });
+    if (dest != "") {
+        window.location = "?page=" + dest;
+    }
+});
+</script>
+{% endblock %}

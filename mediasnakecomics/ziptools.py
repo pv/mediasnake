@@ -215,7 +215,7 @@ def recursive_find(dirname, unpackers, progress_queue=None):
     return files, file_unpackers
 
 
-class FileList(object):
+class PackedFile(object):
     """Get a list of files in given sources, including contents of archives,
     which will be recursively unpacked."""
     
@@ -233,25 +233,27 @@ class FileList(object):
         '.7z': SevenZipUnpacker,
         })
 
-    def __init__(self, filenames, extensionlist=None, progress_queue=None):
-        if not isinstance(filenames, list):
-            filenames = [filenames]
-
-        # Recursive find
+    def __init__(self, filename, extensionlist=None, progress_queue=None,
+                 accept_ext=None):
         self._files = []
         self._file_unpackers = {}
-        for filename in filenames:
-            fns, ups = recursive_find(filename, FileList.zip_extension_map,
-                                      progress_queue)
-            self._files += fns
-            self._file_unpackers.update(ups)
+
+        if not os.path.isfile(filename):
+            raise IOError("not a file")
+
+        fns, ups = recursive_find(filename, PackedFile.zip_extension_map,
+                                  progress_queue)
+        if accept_ext is not None:
+            fns = [fn for fn in fns if os.path.splitext(fn)[1].lower() in accept_ext]
+        self._files += fns
+        self._file_unpackers.update(ups)
 
         if extensionlist:
             self._files = [i for i in self._files
                            if os.path.splitext(i)[1].lower() in extensionlist]
 
     def __repr__(self):
-        return "<FileList: {}>".format(repr(self._files))
+        return "<PackedFile: {}>".format(repr(self._files))
 
     def __str__(self):
         return str(self._files)
@@ -268,3 +270,10 @@ class FileList(object):
             return unpacker.read_file(fn)
         else:
             return open(fn, 'rb')
+
+
+class ImagePack(PackedFile):
+    extensions = ('.png', '.jpg', '.jpeg', '.gif')
+
+    def __init__(self, filename):
+        PackedFile.__init__(self, filename, accept_ext=ImagePack.extensions)
