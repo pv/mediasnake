@@ -7,6 +7,7 @@ from django.utils.encoding import smart_text
 from django.db import connection
 
 from mediasnakefiles.scanner import register_scanner, scan_message
+from mediasnakefiles.ziptools import ImagePack
 
 
 class Comic(models.Model):
@@ -40,6 +41,15 @@ def _comic_scan(existing_files, mime_cache):
               or filename.endswith('.zip')
               or filename.endswith('.rar'))
         if not ok:
+            continue
+
+        try:
+            pages = ImagePack(filename)
+        except (IOError, ValueError):
+            continue
+
+        if len(pages) == 0:
+            # Doesn't contain any images
             continue
 
         title = os.path.splitext(os.path.basename(filename))[0]
