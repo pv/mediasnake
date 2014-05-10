@@ -1,48 +1,36 @@
 {% extends "mediasnakecomics/base.html" %}
 
-{% block title %}{{ comic.title }} [{{ comic.path }}]{% endblock %}
+{% block title %}{{ comic.title }}xx [{{ comic.path }}]{% endblock %}
 
 {% block content %}
-<div class='ebook'>
-  <div class='controls'>
-    {% if prev >= 0 %}
-    <a class="btn" href="{% url 'comic-page' comic.id prev %}">Prev</a>
-    {% endif %}
-    <select id="chapter-select">
-      <option value="" selected>Jump to page</option>
-      {% for _ in pages %}
-      <option value="{{ forloop.counter0 }}" {% if forloop.counter0 == page %}selected{% endif %}>{{ forloop.counter }}</option>
-      {% endfor %}
-    </select>
-    {% if next %}
-    <a class="btn pull-right" href="{% url 'comic-page' comic.id next %}">Next</a>
-    {% endif %}
-  </div>
-  <div class="ebook-text" id="ebook-text">
-    <img src="./image/">
-  </div>
-  <div class='controls'>
-    {% if prev %}
-    <a class="btn" href="{% url 'comic-page' comic.id prev %}">Prev</a>
-    {% endif %}
-    {% if next %}
-    <a class="btn pull-right" href="{% url 'comic-page' comic.id next %}">Next</a>
-    {% endif %}
-  </div>
+<div class='comic'>
+  <ul class="media-list">
+    {% for idx in pages %}
+    <li class="media">
+      <a class="pull-left" href="#{{ forloop.counter }}">
+	<img id="{{ forloop.counter0 }}" class="comic-image" src="holder.js/600x900" data-src="./{{ idx }}/" 
+             onclick="setBookmark({{ forloop.counter }})">
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
 </div>
 {% endblock %}
 
-
 {% block extra_js %}
+<script type="text/javascript" src="{{ STATIC_URL }}mediasnake/js/django-ajax.js?version={{ MEDIASNAKE_VERSION }}"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}holder/js/holder.js?version=2.3.2"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}unveil/js/jquery.unveil.min.js?version=1.1.0"></script>
 <script>
-$("#chapter-select").change(function() {
-    var dest = "";
-    $("#chapter-select option:selected").each(function () {
-        dest = $(this).attr("value");
-    });
-    if (dest != "") {
-        window.location = "{% url 'comic-page' comic.id '1234' %}".replace("1234", dest);
-    }
-});
+var setBookmark = function (page) {
+  $.post("./bookmark/", { "page": page });
+  return true;
+}
+
+$(document).ready(function () {
+    Holder.run()
+    location.href = "#{{ active_page }}";
+    $('.comic-image').unveil();
+})
 </script>
 {% endblock %}

@@ -14,6 +14,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.utils.encoding import smart_text
+from django.core.urlresolvers import reverse
 
 from mediasnakecomics.models import Comic, Bookmark
 
@@ -81,7 +82,7 @@ def recent(request):
     return render(request, "mediasnakecomics/recent.html", context)
 
 
-def _get_comic(id, page):
+def _get_comic(id):
     try:
         comic = Comic.objects.get(pk=id)
     except Comic.DoesNotExist:
@@ -90,32 +91,28 @@ def _get_comic(id, page):
         pages = ImagePack(comic.filename)
     except IOError:
         raise Http404
-    if page < 0 or page >= len(pages):
-        raise Http404
     return comic, pages
 
 
 @login_required
 #@cache_page(30*24*60*60)
-def comic_page(request, id, page):
-    page = int(page)
-    comic, pages = _get_comic(id, page)
-
-    context = {
-        'comic': comic,
-        'page': page,
-        'pages': pages,
-        'next': page + 1 if page + 1 < len(pages) else None,
-        'prev': page - 1 if page > 0 else None,
-    }
+def comic(request, id):
+    comic, pages = _get_comic(id)
 
     try:
         bookmark = Bookmark.objects.get(comic=comic)
     except Bookmark.DoesNotExist:
-        if page != 0:
-            bookmark = Bookmark(comic=comic)
-            bookmark.page = page
-            bookmark.save()
+        bookmark = Bookmark(comic=comic)
+        bookmark.page = 0
+        bookmark.save()
+
+    active_page = bookmark.page
+
+    context = {
+        'comic': comic,
+        'pages': list(range(len(pages))),
+        'active_page': active_page,
+    }
 
     return render(request, "mediasnakecomics/comic.html", context)
 
@@ -124,7 +121,7 @@ def comic_page(request, id, page):
 #@cache_page(30*24*60*60)
 def image(request, id, page):
     page = int(page)
-    comic, pages = _get_comic(id, page)
+    comic, pages = _get_comic(id)
 
     mimetypes = {
         '.gif': 'image/gif',
@@ -140,16 +137,27 @@ def image(request, id, page):
 
 
 @login_required
-def comic_start(request, id):
-    try:
-        comic = Comic.objects.get(pk=id)
-    except Comic.DoesNotExist:
+def bookmark(request, id):
+    if request.method != 'POST':
         raise Http404
 
     try:
-        bookmark = Bookmark.objects.get(comic=comic)
-        page = bookmark.page
-    except Bookmark.DoesNotExist:
-        page = 0
+        page = int(request.POST['page'])
+    except (ValueError, KeyError):
+        return HttpResponse("400 Bad request", status=400)
 
-    return redirect('comic-page', id, page)
+    comic, pages = _get_comic(id)
+
+    if page < 0 or page >= len(pages):
+        return HttpResponse("400 Bad request", status=400)
+
+    try:
+        bookmark = Bookmark.objects.get(comic=comic)
+    except Bookmark.DoesNotExist:
+        bookmark = Bookmark(comic=comic)
+
+    bookmark.page = page
+    bookmark.save()
+
+    content = json.dumps(True)
+    return HttpResponse(content, content_type="application/json")
