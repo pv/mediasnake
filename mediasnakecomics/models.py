@@ -7,7 +7,7 @@ from django.utils.encoding import smart_text
 from django.db import connection
 
 from mediasnakefiles.scanner import register_scanner, scan_message
-from mediasnakefiles.ziptools import ImagePack
+from mediasnakecomics.ziptools import ImagePack
 
 
 class Comic(models.Model):

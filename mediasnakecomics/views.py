@@ -110,8 +110,8 @@ def comic(request, id):
 
     context = {
         'comic': comic,
-        'pages': list(range(len(pages))),
         'active_page': active_page,
+        'num_pages': len(pages),
     }
 
     return render(request, "mediasnakecomics/comic.html", context)

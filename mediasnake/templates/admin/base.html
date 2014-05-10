@@ -9,7 +9,7 @@
 {% if LANGUAGE_BIDI %}<link rel="stylesheet" type="text/css" href="{% block stylesheet_rtl %}{% static "admin/css/rtl.css" %}{% endblock %}" />{% endif %}
 <script type="text/javascript">window.__admin_media_prefix__ = "{% filter escapejs %}{% static "admin/" %}{% endfilter %}";</script>
 {% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE" />{% endblock %}
-{{ super }}
+{{ block.super }}
 {% endblock %}
 
 {% block body %}
