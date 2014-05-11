@@ -76,7 +76,7 @@ var preloadImages = function () {
 }
 
 var updatePosition = function () {
-    if (inFlightCalls == 0) {
+    if (inFlightCalls < 2) {
         src = $("#image").attr("src");
         new_src = "./" + curPage + "/";
         if (src != new_src) {
