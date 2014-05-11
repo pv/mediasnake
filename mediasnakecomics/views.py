@@ -107,6 +107,11 @@ def comic(request, id):
 
     active_page = bookmark.page
 
+    if active_page >= len(pages):
+        active_page = len(pages) - 1
+    if active_page < 0:
+        active_page = 0
+
     context = {
         'comic': comic,
         'active_page': active_page,
@@ -145,10 +150,10 @@ def bookmark(request, id):
     except (ValueError, KeyError):
         return HttpResponse("400 Bad request", status=400)
 
-    comic, pages = _get_comic(id)
-
-    if page < 0 or page >= len(pages):
-        return HttpResponse("400 Bad request", status=400)
+    try:
+        comic = Comic.objects.get(pk=id)
+    except Comic.DoesNotExist:
+        raise Http404
 
     try:
         bookmark = Bookmark.objects.get(comic=comic)
@@ -158,5 +163,4 @@ def bookmark(request, id):
     bookmark.page = page
     bookmark.save()
 
-    content = json.dumps(True)
-    return HttpResponse(content, content_type="application/json")
+    return HttpResponse("{}", content_type="application/json")
