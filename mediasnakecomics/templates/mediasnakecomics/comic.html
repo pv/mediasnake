@@ -71,10 +71,10 @@ $("#comic").click(function (event) {
    var w = $(this).width();
    var h = $(this).height();
 
-   if (event.pageX > posx + w/4) {
+   if (event.pageX > posx + 3*w/4) {
       pageSkip(-1);
    } 
-   else if (event.pageX > posx + w/4) {
+   else if (event.pageX < posx + w/4) {
       pageSkip(1);
    }
    else if (event.pageY < posy + h/5) {
