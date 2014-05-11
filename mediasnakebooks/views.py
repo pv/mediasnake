@@ -2,6 +2,7 @@ import os
 import re
 import time
 import json
+import urllib
 
 from django.conf import settings
 from django.db.models import Q
@@ -45,9 +46,15 @@ def index(request):
 
     recent = Bookmark.objects.all()[:5]
 
+    if search_str:
+        search_str_query = urllib.urlencode({u'search': search_str}) + u'&'
+    else:
+        search_str_query = u''
+
     context = {'books': books,
                'pages': range(1, paginator.num_pages+1),
                'search_str': search_str,
+               'search_str_query': search_str_query,
                'recent': recent,
                }
     return render(request, "mediasnakebooks/index.html", context)
