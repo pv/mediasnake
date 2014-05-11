@@ -53,6 +53,7 @@ var pageSkip = function (n) {
         curPage = 0;
     }
     window.getSelection().removeAllRanges();
+    $("#image").css("opacity", 0.5);
     $("#image").attr("src", "./" + curPage + "/")
     preloadImages();
     $("html, body").animate({scrollTop: $("#image").offset().top}, 200);
@@ -97,6 +98,10 @@ $("#comic").dblclick(function (event) {
    else if (event.pageY > posy + 4*h/5) {
       pageSkip(999999);
    } 
+});
+
+$("#image").load(function () {
+   $("#image").css("opacity", 1.0);
 });
 
 $(document.documentElement).keypress(function (event) {
