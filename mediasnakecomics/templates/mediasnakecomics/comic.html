@@ -71,18 +71,18 @@ $("#comic").click(function (event) {
    var w = $(this).width();
    var h = $(this).height();
 
-   if (event.pageY < posy + h/5) {
+   if (event.pageX > posx + w/4) {
+      pageSkip(-1);
+   } 
+   else if (event.pageX > posx + w/4) {
+      pageSkip(1);
+   }
+   else if (event.pageY < posy + h/5) {
       pageSkip(-10);
    } 
    else if (event.pageY > posy + 4*h/5) {
       pageSkip(10);
    } 
-   else if (event.pageX > posx + w/2) {
-      pageSkip(-1);
-   } 
-   else {
-      pageSkip(1);
-   }
 });
 
 $("#comic").dblclick(function (event) {
