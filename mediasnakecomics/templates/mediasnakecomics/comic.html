@@ -29,8 +29,19 @@ var curPage = {{ active_page }};
 var numPages = {{ num_pages }};
 
 var setBookmark = function (page) {
-  $.post("./bookmark/", { "page": page });
-  return true;
+    $.post("./bookmark/", { "page": page });
+    return true;
+}
+
+var preloadImages = function () {
+    if (curPage > 0) {
+        var img = new Image();
+        img.src = "./" + (curPage-1) + "/";
+    }
+    if (curPage < numPages - 1) {
+        var img = new Image();
+        img.src = "./" + (curPage+1) + "/";
+    }
 }
 
 var pageSkip = function (n) {
@@ -43,6 +54,7 @@ var pageSkip = function (n) {
     }
     window.getSelection().removeAllRanges();
     $("#image").attr("src", "./" + curPage + "/")
+    preloadImages();
     $("html, body").animate({scrollTop: $("#image").offset().top}, 200);
     setBookmark(curPage);
     $("#page-number").text((curPage+1) + " / " + numPages);
