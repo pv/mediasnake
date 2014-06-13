@@ -19,7 +19,7 @@ import django.utils.timezone
 
 import logging
 
-from mediasnakefiles.scanner import register_scanner, scan_message
+from mediasnakefiles.scanner import register_scanner, scan_message, asfsunicode
 
 logger = logging.getLogger('mediasnake')
 
@@ -199,7 +199,7 @@ def _streaming_ticket_cleanup_symlink(sender, instance, using, **kwargs):
 
 @register_scanner
 def _video_scanner(existing_files, mime_cache):
-    files_in_db = set(VideoFile.objects.values_list('filename', flat=True))
+    files_in_db = set(asfsunicode(x) for x in VideoFile.objects.values_list('filename', flat=True))
     to_add = existing_files.difference(files_in_db)
     to_remove = files_in_db.difference(existing_files)
 

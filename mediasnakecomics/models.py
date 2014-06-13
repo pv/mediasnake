@@ -6,7 +6,7 @@ from django.db import models
 from django.utils.encoding import smart_text
 from django.db import connection
 
-from mediasnakefiles.scanner import register_scanner, scan_message
+from mediasnakefiles.scanner import register_scanner, scan_message, asfsunicode
 from mediasnakecomics.ziptools import ImagePack
 
 
@@ -30,7 +30,7 @@ class Bookmark(models.Model):
 
 @register_scanner
 def _comic_scan(existing_files, mime_cache):
-    files_in_db = set(Comic.objects.values_list('filename', flat=True))
+    files_in_db = set(asfsunicode(x) for x in Comic.objects.values_list('filename', flat=True))
     to_add = existing_files.difference(files_in_db)
     to_remove = files_in_db.difference(existing_files)
 

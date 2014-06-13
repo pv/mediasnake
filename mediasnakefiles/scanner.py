@@ -70,6 +70,16 @@ def _scan():
         return False
 
 
+def asfsunicode(s):
+    if isinstance(s, unicode):
+        return s
+    fsencoding = sys.getfilesystemencoding()
+    try:
+        return s.decode(fsencoding)
+    except UnicodeError:
+        return s
+
+
 def scan_message(msg):
     logger.info(msg)
     set_scan_status(msg)
