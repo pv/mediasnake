@@ -36,6 +36,8 @@ MEDIASNAKEFILE_HTTP_ADDRESS = ini['http_streaming_address'].strip()
 if MEDIASNAKEFILE_HTTP_ADDRESS:
     SESSION_COOKIE_SECURE = True
 
+SESSION_SERIALIZER = "django.contrib.sessions.serializers.JSONSerializer"
+
 DEBUG = ini['debug']
 TEMPLATE_DEBUG = DEBUG
 
