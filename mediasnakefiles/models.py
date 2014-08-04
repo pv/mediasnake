@@ -131,7 +131,10 @@ class StreamingTicket(models.Model):
 
     @classmethod
     def new_for_video(cls, video_file, remote_address):
-        secret = get_secret_128(video_file.filename)
+        fn = video_file.filename
+        if isinstance(fn, unicode):
+            fn = fn.encode('utf-8')
+        secret = get_secret_128(fn)
         return StreamingTicket(secret=secret, video_file=video_file,
                                remote_address=remote_address,
                                timestamp=django.utils.timezone.now())

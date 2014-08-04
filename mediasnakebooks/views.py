@@ -47,7 +47,7 @@ def index(request):
     recent = Bookmark.objects.all()[:5]
 
     if search_str:
-        search_str_query = urllib.urlencode({u'search': search_str}) + u'&'
+        search_str_query = urllib.urlencode({'search': search_str.encode('utf-8')}).decode('utf-8') + u'&'
     else:
         search_str_query = u''
 
