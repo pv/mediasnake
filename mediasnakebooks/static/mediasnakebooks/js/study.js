@@ -124,9 +124,18 @@ var study = (function() {
 	$("#modal-word").modal();
     }
 
+    /**
+     * Return next knowledge level
+     * @param {level} Current knowledge leve
+     * @param {isKnown} One of 1 (increase knowledge), 0 (decrease knowledge), -1 (mark ignored)
+     */
     var getNextLevel = function(level, isKnown) {
 	if (isKnown == 1) {
-	    if (level > 1) {
+	    if (level == 5) {
+		// Mark unencountered as fully known with one click
+		level = 1;
+	    }
+	    else if (level > 1) {
 		level = level - 1;
 	    }
 	    else if (level == 1) {
