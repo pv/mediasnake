@@ -7,14 +7,13 @@
 
 {% for entry in entries %}
 <p>
-  <a href="{{ entry.ticket.url }}" type="{{ entry.video_file.mimetype }}" class="btn btn-inverted">Direct link: {{ entry.video_file.extension|upper }}</a> (valid for {{ TICKET_LIFETIME_HOURS }} hours)
+  <a href="{{ entry.ticket.url_external }}" type="{{ entry.video_file.mimetype }}" class="btn btn-inverted">Direct link: {{ entry.video_file.extension|upper }}</a> (valid for {{ TICKET_LIFETIME_HOURS }} hours)
 </p>
 {% endfor %}
 
 <p>
-  <video width="640" controls>
+  <video width="100%" controls>
     {% for entry in entries %}
-    <source src="{{ entry.ticket.url }}" type="{{ entry.video_file.mimetype }}">
     <source src="{{ entry.ticket.url }}" type="{{ entry.video_file.mimetype }}">
     {% endfor %}
     This video format is unfortunately not supported by your browser. You need to use the direct link instead. Sorry!

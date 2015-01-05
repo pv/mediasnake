@@ -144,15 +144,20 @@ class StreamingTicket(models.Model):
         return "file" + os.path.splitext(self.video_file.filename)[1]
 
     @property
-    def url(self):
+    def url_external(self):
         if settings.MEDIASNAKEFILE_HTTP_ADDRESS:
             url = (settings.MEDIASNAKEFILE_HTTP_ADDRESS.rstrip('/')
                    + settings.URL_PREFIX.rstrip('/')
                    + '/ticket/' + self.secret + '/'
                    + self.dummy_name)
         else:
-            url = (reverse('ticket', args=[self.secret]).rstrip('/')
-                   + '/' + self.dummy_name)
+            url = self.url
+        return url
+
+    @property
+    def url(self):
+        url = (reverse('ticket', args=[self.secret]).rstrip('/')
+               + '/' + self.dummy_name)
         return url
 
     def is_valid(self, remote_address):
