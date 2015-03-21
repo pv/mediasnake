@@ -144,7 +144,9 @@ def image(request, id, page):
     image_data = pages.read_file(pages[page])
     image_mime = mimetypes[os.path.splitext(pages[page])[1]]
 
-    return HttpResponse(image_data, mimetype=image_mime)
+    response = HttpResponse(image_data)
+    response['Content-Type'] = image_mime
+    return response
 
 
 @login_required

@@ -116,7 +116,10 @@ class VideoFile(models.Model):
 
     def get_all_versions(self):
         base, ext = os.path.splitext(self.basename)
-        rel_base = os.path.sep + os.path.join(self.relative_dirname, base + '.')
+        if self.relative_dirname == '.':
+            rel_base = os.path.sep + base + '.'
+        else:
+            rel_base = os.path.sep + os.path.join(self.relative_dirname, base + '.')
         return [x for x in VideoFile.objects.filter(filename__contains=rel_base)
                 if x.relative_dirname == self.relative_dirname and x.basename.startswith(base + '.')]
 

@@ -99,9 +99,9 @@ $("#language-select").change(function() {
     $("#language-select option:selected").each(function () {
         lang = $(this).attr("value");
         token_url = $(this).attr("data-token-url");
-        dict_url = $(this).attr("data-dict-url");
-        external_dict_url = $(this).attr("data-external-dict-url");
-        word_url = $(this).attr("data-word-url");
+        dict_url = $(this).attr("data-dict-url").replace(/%40/g, '@');
+        external_dict_url = $(this).attr("data-external-dict-url").replace(/%40/g, '@');
+        word_url = $(this).attr("data-word-url").replace(/%40/g, '@');
         words_url = $(this).attr("data-words-url");
         words_export_url = $(this).attr("data-words-export-url");
     });
